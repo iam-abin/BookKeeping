@@ -1,5 +1,4 @@
 import { body } from 'express-validator';
-import { validateRequest } from '../middlewares';
 
 export const signinRequestBodyValidator = [
     body('email').isEmail().withMessage('Email must be valid').trim().escape(),
@@ -15,5 +14,4 @@ export const signupRequestBodyValidator = [
         .isLength({ min: 4 })
         .withMessage('Password must be between 4 and 20 characters')
         .escape(),
-    // validateRequest,
 ];

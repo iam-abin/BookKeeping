@@ -1,3 +1,3 @@
 export * from './password';
 export * from './winstonLogger';
-export * from './user.validation';
+export * from './validation/user.validation';

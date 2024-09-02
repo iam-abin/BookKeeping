@@ -1,10 +1,10 @@
-export interface UserSignInDto {
+export interface UserCredentialsDto {
     email: string;
     password: string;
 }
 
-export interface UserSignUpDto {
-    name: string;
-    email: string;
+export type UserSignInDto = UserCredentialsDto;
+
+export interface UserRegisterDto extends UserCredentialsDto {
     password: string;
 }
