@@ -7,6 +7,7 @@ import { NotFoundError } from './errors';
 import { errorHandler } from './middlewares';
 import usersRouter from './routes/user';
 import booksRouter from './routes/book';
+import { config } from './config/config';
 
 const app: Application = express();
 
@@ -24,8 +25,8 @@ app.use(
 if (!isProductionENV) app.use(morgan('dev'));
 
 // Routes
-app.use('/api/users', usersRouter);
-app.use('/api/books', booksRouter);
+app.use(`${config.API_BASE_PATH}/users`, usersRouter);
+app.use(`${config.API_BASE_PATH}/books`, booksRouter);
 
 app.all('*', (req: Request, res: Response) => {
     throw new NotFoundError();

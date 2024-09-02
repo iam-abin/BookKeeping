@@ -4,14 +4,15 @@ import {
     createBookRequestBodyValidator,
     updateBookRequestBodyValidator,
 } from '../utils/validation/book.validation';
+import { auth } from '../middlewares';
 
 const router: Router = express.Router();
 
-router.get('/', bookController.getAllBooks);
-router.get('/:id', bookController.getABook);
+router.get('/', auth, bookController.getAllBooks);
+router.get('/:id', auth, bookController.getABook);
 
-router.post('/', createBookRequestBodyValidator, bookController.createBook);
-router.put('/:id', updateBookRequestBodyValidator, bookController.updateBook);
-router.delete('/:id', bookController.deleteBook);
+router.post('/', auth, createBookRequestBodyValidator, bookController.createBook);
+router.put('/:id', auth, updateBookRequestBodyValidator, bookController.updateBook);
+router.delete('/:id', auth, bookController.deleteBook);
 
 export default router;

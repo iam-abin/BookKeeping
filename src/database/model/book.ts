@@ -5,6 +5,7 @@ export interface IBook extends Document {
     author: Schema.Types.ObjectId;
     borrower: Schema.Types.ObjectId;
     library: Schema.Types.ObjectId;
+    coverImageUrl: string;
     isDeleted: boolean;
 }
 
@@ -28,6 +29,10 @@ const bookSchema = new Schema<IBook>(
             type: Schema.Types.ObjectId,
             required: true,
             ref: 'Library',
+        },
+        coverImageUrl: {
+            type: String,
+            required: true,
         },
         isDeleted: {
             type: Boolean,
