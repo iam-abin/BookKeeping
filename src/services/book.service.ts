@@ -28,7 +28,7 @@ export class BookService {
     }
 
     public async deleteBook(bookId: string): Promise<IBook | null> {
-        const book: IBook | null = await bookRepository.updateBook(bookId);
+        const book: IBook | null = await bookRepository.deleteBook(bookId);
         return book;
     }
 }

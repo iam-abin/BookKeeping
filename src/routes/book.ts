@@ -3,7 +3,7 @@ import bookController from '../controllers/book.controller';
 import {
     createBookRequestBodyValidator,
     updateBookRequestBodyValidator,
-} from '../utils/validation/book.validation';
+} from '../utils';
 import { auth } from '../middlewares';
 
 const router: Router = express.Router();

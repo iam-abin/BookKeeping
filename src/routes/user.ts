@@ -1,6 +1,6 @@
 import express, { Router } from 'express';
 import authController from '../controllers/user.controller';
-import { signinRequestBodyValidator, signupRequestBodyValidator } from '../utils/validation/user.validation';
+import { signinRequestBodyValidator, signupRequestBodyValidator } from '../utils';
 import { validateRequest } from '../middlewares';
 
 const router: Router = express.Router();
