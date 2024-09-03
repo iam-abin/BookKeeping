@@ -12,8 +12,8 @@ const listAllLibraries = async (req: Request, res: Response): Promise<void> => {
 };
 
 const getLibraryDetailsById = async (req: Request, res: Response): Promise<void> => {
-    const { libraryId } = req.params;
-    const library: ILibrary = await libraryService.getLibraryById(libraryId);
+    const { id } = req.params;
+    const library: ILibrary = await libraryService.getLibraryById(id);
     res.status(200).json(library);
 };
 
@@ -36,19 +36,15 @@ const deleteLibrary = async (req: Request, res: Response): Promise<void> => {
 
 const borrowBook = async (req: Request, res: Response): Promise<void> => {
     const { userId } = req.user!;
-    const book: IBorrow | null = await libraryService.borrowBook(
-        req.params as unknown as BorrowBookDto,
-        userId,
-    );
+    const book: IBorrow | null = await libraryService.borrowBook(req.body as BorrowBookDto, userId);
     res.status(200).json(book);
 };
 
 const returnBook = async (req: Request, res: Response): Promise<void> => {
+    const { id: bookId } = req.params;
     const { userId } = req.user!;
-    const book: IBorrow | null = await libraryService.borrowBook(
-        req.params as unknown as ReturnBookDto,
-        userId,
-    );
+    const { libraryId } = req.body as unknown as ReturnBookDto;
+    const book: IBorrow | null = await libraryService.returnBook(libraryId, bookId, userId);
     res.status(200).json(book);
 };
 

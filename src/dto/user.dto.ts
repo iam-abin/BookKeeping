@@ -7,4 +7,5 @@ export type UserSignInDto = UserCredentialsDto;
 
 export interface UserRegisterDto extends UserCredentialsDto {
     name: string;
+    role: string;
 }

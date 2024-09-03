@@ -1,9 +1,9 @@
 import mongoose, { Document, Schema } from 'mongoose';
+import { IUser } from './user';
 
 export interface IBook extends Document {
     title: string;
-    authorId: Schema.Types.ObjectId;
-    libraryId: Schema.Types.ObjectId;
+    authorId: Schema.Types.ObjectId | IUser;
     coverImageUrl: string;
     isDeleted: boolean;
 }
@@ -18,11 +18,6 @@ const bookSchema = new Schema<IBook>(
             type: Schema.Types.ObjectId,
             required: true,
             ref: 'User',
-        },
-        libraryId: {
-            type: Schema.Types.ObjectId,
-            required: true,
-            ref: 'Library',
         },
         coverImageUrl: {
             type: String,

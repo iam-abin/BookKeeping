@@ -6,4 +6,4 @@ export interface BookDto {
 }
 
 export type CreateBookDto = BookDto;
-export type UpdateBookDto = BookDto;
+export type UpdateBookDto = Partial<BookDto>;

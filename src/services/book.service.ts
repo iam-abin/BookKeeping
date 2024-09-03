@@ -1,4 +1,4 @@
-import { IBook } from '../database/model';
+import { IBook, IUser } from '../database/model';
 import { BookRepository } from '../database/repository';
 import { CreateBookDto, UpdateBookDto } from '../dto/book.dto';
 import { BadRequestError, ForbiddenError, NotFoundError } from '../errors';
@@ -17,12 +17,12 @@ export class BookService {
         return book;
     }
 
-    public async createBook(createBookDto: CreateBookDto, autherId: string): Promise<IBook> {
+    public async createBook(createBookDto: CreateBookDto, authorId: string): Promise<IBook> {
         const { title } = createBookDto;
         const book: IBook | null = await bookRepository.findByTitle(title);
         if (book) throw new BadRequestError('Book already exist');
 
-        const createdBook: IBook = await bookRepository.createBook(createBookDto, autherId);
+        const createdBook: IBook = await bookRepository.createBook(createBookDto, authorId);
         return createdBook;
     }
 
@@ -33,7 +33,8 @@ export class BookService {
     ): Promise<IBook | null> {
         const book: IBook | null = await bookRepository.findById(bookId);
         if (!book) throw new NotFoundError('Book not found');
-        if (authorId !== book.authorId.toString()) throw new ForbiddenError('You cant modify others book');
+
+        if (authorId != (book.authorId as IUser)._id) throw new ForbiddenError('You cant modify others book');
 
         const updatedBook: IBook | null = await bookRepository.updateBook(bookId, updateBookDto);
         if (!updatedBook) throw new BadRequestError('This book does not exist');
@@ -43,7 +44,14 @@ export class BookService {
     public async deleteBook(bookId: string, authorId: string): Promise<IBook | null> {
         const book: IBook | null = await bookRepository.findById(bookId);
         if (!book) throw new NotFoundError('Book not found');
-        if (authorId !== book.authorId.toString()) throw new ForbiddenError('You cant delete others book');
+
+        console.log('book.authorId.toString()', book.authorId.toString());
+        console.log('(book.authorId as IUser)._id', (book.authorId as IUser)._id);
+        console.log('authorId ', authorId);
+        console.log('authorId != book.authorId.toString()', authorId != (book.authorId as IUser)._id);
+        console.log('authorId !== book.authorId.toString()', authorId !== (book.authorId as IUser)._id);
+
+        if (authorId != (book.authorId as IUser)._id) throw new ForbiddenError('You cant delete others book');
 
         const deletedBook: IBook | null = await bookRepository.deleteBook(bookId);
         return deletedBook;

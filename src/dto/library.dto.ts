@@ -5,4 +5,4 @@ export interface LibraryDto {
 }
 
 export type CreateLibraryDto = LibraryDto;
-export type UpdateLibraryDto = LibraryDto;
+export type UpdateLibraryDto = Partial<LibraryDto>;

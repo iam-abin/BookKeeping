@@ -1,7 +1,6 @@
-import mongoose from 'mongoose';
 import { IBorrow, IInventory, ILibrary } from '../database/model';
 import { InventoryRepository, LibraryRepository } from '../database/repository';
-import { BorrowBookDto, ReturnBookDto } from '../dto/borrow.dto';
+import { BorrowBookDto } from '../dto/borrow.dto';
 import { CreateLibraryDto, UpdateLibraryDto } from '../dto/library.dto';
 import { BadRequestError, NotFoundError } from '../errors';
 import { INVENTRY_ITEM_DECREMENT_COUNT, INVENTRY_ITEM_INCREMENT_COUNT } from '../utils/constants';
@@ -20,6 +19,7 @@ export class LibraryService {
     public async getLibraryById(libraryId: string): Promise<ILibrary> {
         const library: ILibrary | null = await libraryRepository.findLibraryById(libraryId);
         if (!library) throw new NotFoundError('Library not found');
+        if (library.isDeleted) throw new BadRequestError('This is a deleted Library');
         return library;
     }
 
@@ -35,90 +35,61 @@ export class LibraryService {
         libraryId: string,
         updateLibraryDto: Partial<UpdateLibraryDto>,
     ): Promise<ILibrary | null> {
-        const library: ILibrary | null = await libraryRepository.updateLibrary(libraryId, updateLibraryDto);
-        return library;
+        const library: ILibrary | null = await libraryRepository.findLibraryById(libraryId);
+        if (!library) throw new NotFoundError('Library not found');
+        if (library.isDeleted) throw new BadRequestError('Library already deleted');
+        const updatedLibrary: ILibrary | null = await libraryRepository.updateLibrary(
+            libraryId,
+            updateLibraryDto,
+        );
+        return updatedLibrary;
     }
 
     public async deleteLibrary(libraryId: string): Promise<ILibrary | null> {
-        const library: ILibrary | null = await libraryRepository.deleteLibrary(libraryId);
-        return library;
+        const library: ILibrary | null = await libraryRepository.findLibraryById(libraryId);
+        if (!library) throw new NotFoundError('Library not found');
+        if (library.isDeleted) throw new BadRequestError('Library already deleted');
+        const deletedLibrary: ILibrary | null = await libraryRepository.deleteLibrary(libraryId);
+        return deletedLibrary;
     }
 
     public async borrowBook(borrowBookDto: BorrowBookDto, userId: string): Promise<IBorrow | null> {
-        const session = await mongoose.startSession();
-        session.startTransaction();
-        try {
-            const { bookId, libraryId } = borrowBookDto;
+        const { bookId, libraryId } = borrowBookDto;
+        // We can also use transaction here for consistency since we are doing 2 update operation in inventory and borrow
 
-            // Check if the book exists in the library
-            const bookItem: IInventory | null = await inventoryRepository.getInventoryItemByIds(
-                libraryId,
-                bookId,
-            );
-            if (!bookItem) throw new NotFoundError('Book Items not found In this Library');
+        // Check if the book exists in the library
+        const bookItem: IInventory | null = await inventoryRepository.getInventoryItemByIds(
+            libraryId,
+            bookId,
+        );
+        if (!bookItem) throw new NotFoundError('Book Items not found In this Library');
 
-            // Check if there are enough copies available
-            if (bookItem.numberOfCopies <= 0) throw new BadRequestError('No copies available for borrowing');
+        // Check if there are enough copies available
+        if (bookItem.numberOfCopies <= 0) throw new BadRequestError('No copies available for borrowing');
 
-            // Update the inventory to reduce the number of available copies
-            await inventoryRepository.updateInventoryItemCount(
-                libraryId,
-                bookId,
-                INVENTRY_ITEM_DECREMENT_COUNT,
-                session, // Pass the session
-            );
-            // Create a new borrow record
-            const borrowedBook: IBorrow | null = await borrowRepository.borrowBook(
-                libraryId,
-                bookId,
-                userId,
-                session, // Pass the session
-            );
+        // Update the inventory to reduce the number of available copies
+        await inventoryRepository.updateInventoryItemCount(libraryId, bookId, INVENTRY_ITEM_DECREMENT_COUNT);
 
-            // Commit the transaction
-            await session.commitTransaction();
-            session.endSession();
+        // Create a new borrow record
+        const borrowedBook: IBorrow | null = await borrowRepository.borrowBook(libraryId, bookId, userId);
 
-            return borrowedBook;
-        } catch (error) {
-            // If any error occurs, abort the transaction
-            await session.abortTransaction();
-            session.endSession();
-            throw error;
-        }
+        return borrowedBook;
     }
 
-    public async returnBook(returnBookDto: ReturnBookDto, userId: string): Promise<IBorrow | null> {
-        const session = await mongoose.startSession();
-        session.startTransaction();
-        try {
-            const { bookId, libraryId } = returnBookDto;
+    public async returnBook(libraryId: string, bookId: string, borrowerId: string): Promise<IBorrow | null> {
+        // We can also use transaction here for consistency since we are doing 2 update operation in inventory and borrow
+        const updatedBorrow = await borrowRepository.returnBook(libraryId, bookId, borrowerId);
 
-            // Update the borrower record to mark the book as returned
-            const updatedBorrow = await borrowRepository.returnBook(bookId, libraryId, userId, session);
+        if (!updatedBorrow) throw new NotFoundError('Borrow record not found');
 
-            if (!updatedBorrow) throw new NotFoundError('Borrow record not found');
+        const updatedInventory = await inventoryRepository.updateInventoryItemCount(
+            libraryId,
+            bookId,
+            INVENTRY_ITEM_INCREMENT_COUNT,
+        );
 
-            // Update the inventory to increase the number of available copies
-            const updatedInventory = await inventoryRepository.updateInventoryItemCount(
-                libraryId,
-                bookId,
-                INVENTRY_ITEM_INCREMENT_COUNT,
-                session,
-            );
+        if (!updatedInventory) throw new NotFoundError('Inventory item not found');
 
-            if (!updatedInventory) throw new NotFoundError('Inventory item not found');
-
-            // Commit the transaction
-            await session.commitTransaction();
-            session.endSession();
-
-            return updatedBorrow;
-        } catch (error) {
-            // If any error occurs, abort the transaction
-            await session.abortTransaction();
-            session.endSession();
-            throw error;
-        }
+        return updatedBorrow;
     }
 }

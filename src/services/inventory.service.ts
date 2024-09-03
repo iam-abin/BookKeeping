@@ -5,9 +5,8 @@ import { NotFoundError } from '../errors';
 const inventoryRepository = new InventoryRepository();
 
 export class InventoryService {
-    public async getLibraryInventoriesByLibraryId(libraryId: string): Promise<IInventory[] | []> {
-        const inventories: IInventory[] | [] =
-            await inventoryRepository.getLibraryInventoriesByLibraryId(libraryId);
+    public async getInventoryByLibraryId(libraryId: string): Promise<IInventory[] | []> {
+        const inventories: IInventory[] | [] = await inventoryRepository.getInventoryByLibraryId(libraryId);
         return inventories;
     }
 
@@ -26,8 +25,12 @@ export class InventoryService {
             libraryId,
             bookId,
         );
+
         let book: IInventory | null;
         if (inventoryBook) {
+            console.log('inventoryBook is ', inventoryBook);
+
+            // It will enable item if it is already deleted
             book = await inventoryRepository.updateInventoryItemCount(libraryId, bookId, numberOfCopies);
             return book;
         }
@@ -36,8 +39,8 @@ export class InventoryService {
         return book;
     }
 
-    public async removeBookFromInventory(libraryId: string, bookId: string): Promise<IInventory | null> {
-        const book: IInventory | null = await inventoryRepository.getInventoryItemByIds(libraryId, bookId);
+    public async deleteInventoryItem(libraryId: string, bookId: string): Promise<IInventory | null> {
+        const book: IInventory | null = await inventoryRepository.deleteInventoryItem(libraryId, bookId);
         return book;
     }
 }

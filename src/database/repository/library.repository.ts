@@ -7,11 +7,11 @@ export class LibraryRepository {
     }
 
     async findAllLibraries(): Promise<ILibrary[] | []> {
-        return await LibraryModel.find();
+        return await LibraryModel.find({ isDeleted: false });
     }
 
     async findLibraryById(libraryId: string): Promise<ILibrary | null> {
-        return await LibraryModel.findById({ libraryId }).populate('libraryId');
+        return await LibraryModel.findById(libraryId);
     }
 
     async findLibraryByName(libraryName: string): Promise<ILibrary | null> {

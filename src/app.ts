@@ -9,7 +9,7 @@ import { config } from './config/config';
 import borrowRoutes from './routes/borrow';
 import userRoutes from './routes/user';
 import bookRoutes from './routes/book';
-import libraryRoutes from './routes/book';
+import libraryRoutes from './routes/library';
 
 const app: Application = express();
 

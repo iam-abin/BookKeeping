@@ -8,8 +8,9 @@ const router: Router = express.Router();
 
 router.get('/', bookController.getAllBooks);
 router.get('/:id', bookController.getABook);
-router.post('/', auth(UserRole.AUTHOR), createBookRequestBodyValidator, bookController.createBook);
 
+router.post('/', auth(UserRole.AUTHOR), createBookRequestBodyValidator, bookController.createBook);
 router.put('/:id', auth(UserRole.AUTHOR), updateBookRequestBodyValidator, bookController.updateBook);
+router.delete('/:id', auth(UserRole.AUTHOR), bookController.deleteBook);
 
 export default router;
