@@ -1,10 +1,9 @@
 import { Request, Response } from 'express';
-import { BookService, LibraryService } from '../services';
-import { IBook, ILibrary } from '../database/model';
+import { BookService } from '../services';
+import { IBook } from '../database/model';
 import { CreateBookDto, UpdateBookDto } from '../dto/book.dto';
 
 const bookService = new BookService();
-const libraryService = new LibraryService();
 
 const getAllBooks = async (req: Request, res: Response): Promise<void> => {
     const books: IBook[] | [] = await bookService.getAllBooks();
@@ -12,28 +11,28 @@ const getAllBooks = async (req: Request, res: Response): Promise<void> => {
 };
 
 const getABook = async (req: Request, res: Response): Promise<void> => {
-    const { bookId } = req.params;
-    const book: IBook = await bookService.getABookById(bookId);
+    const { id } = req.params;
+    const book: IBook = await bookService.getABookById(id);
     res.status(200).json(book);
 };
 
 const createBook = async (req: Request, res: Response): Promise<void> => {
-    const { libraryId } = req.params;
-    const library: ILibrary = await libraryService.getLibraryById(libraryId);
-    
-    const book: IBook = await bookService.createBook(req.body as CreateBookDto);
+    const { userId } = req.user!;
+    const book: IBook = await bookService.createBook(req.body as CreateBookDto, userId);
     res.status(201).json(book);
 };
 
 const updateBook = async (req: Request, res: Response): Promise<void> => {
-    const { bookId } = req.params;
-    const book: IBook | null = await bookService.updateBook(bookId, req.body as UpdateBookDto);
+    const { id } = req.params;
+    const { userId } = req.user!;
+    const book: IBook | null = await bookService.updateBook(id, userId, req.body as Partial<UpdateBookDto>);
     res.status(200).json(book);
 };
 
 const deleteBook = async (req: Request, res: Response): Promise<void> => {
-    const { bookId } = req.params;
-    const book: IBook | null = await bookService.deleteBook(bookId);
+    const { id } = req.params;
+    const { userId } = req.user!;
+    const book: IBook | null = await bookService.deleteBook(id, userId);
     res.status(200).json(book);
 };
 

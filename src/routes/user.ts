@@ -6,7 +6,8 @@ import { validateRequest } from '../middlewares';
 const router: Router = express.Router();
 
 router.post('/register', signupRequestBodyValidator, validateRequest, authController.signup);
-
 router.post('/login', signinRequestBodyValidator, validateRequest, authController.signin);
 
 export default router;
+
+// authors, library, borrower

@@ -1,11 +1,9 @@
-import { IBook, ILibrary } from '../database/model';
-import { BookRepository, LibraryRepository } from '../database/repository';
+import { IBook } from '../database/model';
+import { BookRepository } from '../database/repository';
 import { CreateBookDto, UpdateBookDto } from '../dto/book.dto';
-import { NotFoundError } from '../errors';
+import { BadRequestError, ForbiddenError, NotFoundError } from '../errors';
 
 const bookRepository = new BookRepository();
-const libraryRepository = new LibraryRepository();
-
 
 export class BookService {
     public async getAllBooks(): Promise<IBook[] | []> {
@@ -19,22 +17,35 @@ export class BookService {
         return book;
     }
 
-    public async createBook(createBookDto: CreateBookDto): Promise<IBook> {
-        const {libraryId} = createBookDto
-        const library: ILibrary | null = await libraryRepository.findById(libraryId);
-        if (!library) throw new NotFoundError('Library not found');
-     
-        const book: IBook = await bookRepository.createBook(createBookDto);
-        return book;
+    public async createBook(createBookDto: CreateBookDto, autherId: string): Promise<IBook> {
+        const { title } = createBookDto;
+        const book: IBook | null = await bookRepository.findByTitle(title);
+        if (book) throw new BadRequestError('Book already exist');
+
+        const createdBook: IBook = await bookRepository.createBook(createBookDto, autherId);
+        return createdBook;
     }
 
-    public async updateBook(bookId: string, updateBookDto: Partial<UpdateBookDto>): Promise<IBook | null> {
-        const book: IBook | null = await bookRepository.updateBook(bookId, updateBookDto);
-        return book;
+    public async updateBook(
+        bookId: string,
+        authorId: string,
+        updateBookDto: Partial<UpdateBookDto>,
+    ): Promise<IBook | null> {
+        const book: IBook | null = await bookRepository.findById(bookId);
+        if (!book) throw new NotFoundError('Book not found');
+        if (authorId !== book.authorId.toString()) throw new ForbiddenError('You cant modify others book');
+
+        const updatedBook: IBook | null = await bookRepository.updateBook(bookId, updateBookDto);
+        if (!updatedBook) throw new BadRequestError('This book does not exist');
+        return updatedBook;
     }
 
-    public async deleteBook(bookId: string): Promise<IBook | null> {
-        const book: IBook | null = await bookRepository.deleteBook(bookId);
-        return book;
+    public async deleteBook(bookId: string, authorId: string): Promise<IBook | null> {
+        const book: IBook | null = await bookRepository.findById(bookId);
+        if (!book) throw new NotFoundError('Book not found');
+        if (authorId !== book.authorId.toString()) throw new ForbiddenError('You cant delete others book');
+
+        const deletedBook: IBook | null = await bookRepository.deleteBook(bookId);
+        return deletedBook;
     }
 }

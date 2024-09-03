@@ -1,32 +1,27 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
-export interface IBook extends Document {
-    title: string;
-    authorId: Schema.Types.ObjectId;
+export interface IInventory extends Document {
     libraryId: Schema.Types.ObjectId;
-    coverImageUrl: string;
+    bookId: Schema.Types.ObjectId;
+    numberOfCopies: number;
     isDeleted: boolean;
 }
 
-const bookSchema = new Schema<IBook>(
+const inventorySchema = new Schema<IInventory>(
     {
-        title: {
-            type: String,
-            required: true,
-        },
-        authorId: {
-            type: Schema.Types.ObjectId,
-            required: true,
-            ref: 'User',
-        },
         libraryId: {
             type: Schema.Types.ObjectId,
             required: true,
             ref: 'Library',
         },
-        coverImageUrl: {
-            type: String,
+        bookId: {
+            type: Schema.Types.ObjectId,
             required: true,
+            ref: 'Book',
+        },
+        numberOfCopies: {
+            type: Number,
+            default: 1,
         },
         isDeleted: {
             type: Boolean,
@@ -43,4 +38,4 @@ const bookSchema = new Schema<IBook>(
     },
 );
 
-export const BookModel = mongoose.model<IBook>('Book', bookSchema);
+export const InventoryModel = mongoose.model<IInventory>('Inventory', inventorySchema);

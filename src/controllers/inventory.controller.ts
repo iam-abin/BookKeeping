@@ -1,33 +1,43 @@
 import { Request, Response } from 'express';
-import { LibraryService } from '../services';
-import { IBook, ILibrary } from '../database/model';
-import { CreateLibraryDto, UpdateLibraryDto } from '../dto/library.dto';
+import { IInventory } from '../database/model';
 import { InventoryService } from '../services/inventory.service';
 
-const libraryService = new LibraryService();
 const inventoryService = new InventoryService();
 
-// router.get('/:id/inventory', libraryController.getLibraryInventryById);
-// // router.post('/:id/inventory', libraryController.getLibraryById);
-// router.delete('/:id/inventory/:bookId ', libraryController.removeFromInventory);
+const listBooksInLibrary = async (req: Request, res: Response): Promise<void> => {
+    const { libraryId } = req.params;
 
-const getLibraryInventriesByLibraryId = async (req: Request, res: Response): Promise<void> => {
-    const{libraryId } = req.params
-    const libraryInventories: IBook[] | [] = await inventoryService.getLibraryInventriesByLibraryId(libraryId);
+    const libraryInventories: IInventory[] | [] =
+        await inventoryService.getLibraryInventoriesByLibraryId(libraryId);
     res.status(200).json(libraryInventories);
 };
 
 const getInventoryItemById = async (req: Request, res: Response): Promise<void> => {
     const { libraryId, bookId } = req.params;
-    const item: IBook = await inventoryService.getInventoryItemById(libraryId, bookId);
-    
+    const item: IInventory = await inventoryService.getInventoryItemById(libraryId, bookId);
+
     res.status(200).json(item);
 };
 
-const deleteLibraryInventryItem = async (req: Request, res: Response): Promise<void> => {
+const addBookToInventory = async (req: Request, res: Response): Promise<void> => {
     const { libraryId, bookId } = req.params;
-    const inventoryItem: IBook | null = await inventoryService.deleteLibraryInventryItem(libraryId, bookId );
+    const { numberOfCopies } = req.body;
+    const item: IInventory | null = await inventoryService.addBookToInventory(
+        libraryId,
+        bookId,
+        numberOfCopies,
+    );
+
+    res.status(200).json(item);
+};
+
+const removeBookFromInventory = async (req: Request, res: Response): Promise<void> => {
+    const { libraryId, bookId } = req.params;
+    const inventoryItem: IInventory | null = await inventoryService.removeBookFromInventory(
+        libraryId,
+        bookId,
+    );
     res.status(200).json(inventoryItem);
 };
 
-export default { getLibraryInventriesByLibraryId, getInventoryItemById, deleteLibraryInventryItem };
+export default { listBooksInLibrary, getInventoryItemById, addBookToInventory, removeBookFromInventory };

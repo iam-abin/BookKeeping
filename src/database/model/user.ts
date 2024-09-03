@@ -1,10 +1,12 @@
 import mongoose, { Document, Schema } from 'mongoose';
 import { generateHashedPassword } from '../../utils';
+import { UserRole } from '../../utils/roles';
 
 export interface IUser extends Document {
     name: string;
     email: string;
     password: string;
+    role: UserRole;
 }
 
 const userSchema = new Schema<IUser>(
@@ -21,6 +23,11 @@ const userSchema = new Schema<IUser>(
         password: {
             type: String,
             required: true,
+        },
+        role: {
+            type: String,
+            required: true,
+            enum: Object.values(UserRole),
         },
     },
     {

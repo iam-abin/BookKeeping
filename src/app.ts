@@ -6,6 +6,7 @@ import cors from 'cors';
 import { NotFoundError } from './errors';
 import { errorHandler } from './middlewares';
 import { config } from './config/config';
+import borrowRoutes from './routes/borrow';
 import userRoutes from './routes/user';
 import bookRoutes from './routes/book';
 import libraryRoutes from './routes/book';
@@ -26,6 +27,7 @@ app.use(
 if (!isProductionENV) app.use(morgan('dev'));
 
 // Routes
+app.use(`${config.API_BASE_PATH}/`, borrowRoutes);
 app.use(`${config.API_BASE_PATH}/users`, userRoutes);
 app.use(`${config.API_BASE_PATH}/books`, bookRoutes);
 app.use(`${config.API_BASE_PATH}/libraries`, libraryRoutes);

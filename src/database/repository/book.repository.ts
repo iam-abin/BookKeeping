@@ -2,8 +2,8 @@ import { CreateBookDto, UpdateBookDto } from '../../dto/book.dto';
 import { BookModel, IBook } from '../model';
 
 export class BookRepository {
-    async createBook(bookData: CreateBookDto): Promise<IBook> {
-        const book = await BookModel.create(bookData);
+    async createBook(bookData: CreateBookDto, autherId: string): Promise<IBook> {
+        const book = await BookModel.create({ ...bookData, autherId });
         return book;
     }
 
@@ -13,17 +13,17 @@ export class BookRepository {
     }
 
     async findById(bookId: string): Promise<IBook | null> {
-        const book = await BookModel.findById({ bookId });
+        const book = await BookModel.findById(bookId);
         return book;
     }
 
-    // async findByTitle(title: string): Promise<IBook | null> {
-    //     const book = await BookModel.findOne({ title });
-    //     return book;
-    // }
+    async findByTitle(title: string): Promise<IBook | null> {
+        const book = await BookModel.findOne({ title });
+        return book;
+    }
 
     async updateBook(bookId: string, bookUpdateData?: Partial<UpdateBookDto>): Promise<IBook | null> {
-        const updatedBook = await BookModel.findByIdAndUpdate(bookId, { ...bookUpdateData }, { new: true });
+        const updatedBook = await BookModel.findByIdAndUpdate(bookId, bookUpdateData, { new: true });
         return updatedBook;
     }
 

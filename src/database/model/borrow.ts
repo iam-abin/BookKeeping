@@ -4,7 +4,7 @@ export interface IBorrow extends Document {
     bookId: Schema.Types.ObjectId;
     borrowerId: Schema.Types.ObjectId;
     libraryId: Schema.Types.ObjectId;
-    isReturned: boolean
+    isReturned: boolean;
 }
 
 const borrowSchema = new Schema<IBorrow>(

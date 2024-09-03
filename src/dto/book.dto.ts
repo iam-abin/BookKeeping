@@ -3,7 +3,6 @@ export interface BookDto {
     authorId: string;
     libraryId: string;
     coverImageUrl: string;
-    numberOfCopies: number;
 }
 
 export type CreateBookDto = BookDto;

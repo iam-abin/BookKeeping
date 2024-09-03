@@ -3,18 +3,19 @@ import { LibraryModel, ILibrary } from '../model';
 
 export class LibraryRepository {
     async createLibrary(libraryData: CreateLibraryDto): Promise<ILibrary> {
-        const library = await LibraryModel.create(libraryData);
-        return library;
+        return await LibraryModel.create(libraryData);
     }
 
     async findAllLibraries(): Promise<ILibrary[] | []> {
-        const librarys = await LibraryModel.find();
-        return librarys;
+        return await LibraryModel.find();
     }
 
-    async findById(libraryId: string): Promise<ILibrary | null> {
-        const library = await LibraryModel.findById({ libraryId });
-        return library;
+    async findLibraryById(libraryId: string): Promise<ILibrary | null> {
+        return await LibraryModel.findById({ libraryId }).populate('libraryId');
+    }
+
+    async findLibraryByName(libraryName: string): Promise<ILibrary | null> {
+        return await LibraryModel.findOne({ libraryName });
     }
 
     async updateLibrary(

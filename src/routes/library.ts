@@ -4,19 +4,25 @@ import inventoryController from '../controllers/inventory.controller';
 
 import { auth } from '../middlewares';
 import { createLibraryRequestBodyValidator, updateLibraryRequestBodyValidator } from '../utils';
+import { UserRole } from '../utils/roles';
 
 const router: Router = express.Router();
 
-router.get('/', libraryController.getAllLibraries);
-router.get('/:id', libraryController.getLibraryById);
+router.get('/', libraryController.listAllLibraries);
+router.get('/:id', libraryController.getLibraryDetailsById);
 
-router.post('/', auth, createLibraryRequestBodyValidator, libraryController.createLibrary);
-router.put('/:id', auth, updateLibraryRequestBodyValidator, libraryController.updateLibrary);
-router.delete('/:id', auth, libraryController.deleteLibrary);
+router.post('/', auth(UserRole.LIBRARY), createLibraryRequestBodyValidator, libraryController.createLibrary);
+router.put(
+    '/:id',
+    auth(UserRole.LIBRARY),
+    updateLibraryRequestBodyValidator,
+    libraryController.updateLibrary,
+);
+router.delete('/:id', auth(UserRole.LIBRARY), libraryController.deleteLibrary);
 
 // Inventory management routes
-router.get('/:id/inventory', inventoryController.getLibraryInventriesByLibraryId);
-// router.post('/:id/inventory', inventoryController.getLibraryById);
-router.delete('/:id/inventory/:bookId ', inventoryController.deleteLibraryInventryItem);
+router.get('/:id/inventory', inventoryController.listBooksInLibrary);
+router.post('/:id/inventory', inventoryController.addBookToInventory);
+router.delete('/:id/inventory/:bookId ', inventoryController.removeBookFromInventory);
 
 export default router;

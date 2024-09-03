@@ -17,6 +17,7 @@ const signin = async (req: Request, res: Response): Promise<void> => {
         userId: user._id as string,
         name: user.name,
         email: user.email,
+        role: user.role,
     };
     const jwt = createJwtAccessToken(userPayload);
     res.status(201).json({ user, accessToken: jwt });
