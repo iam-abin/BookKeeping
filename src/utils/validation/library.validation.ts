@@ -1,7 +1,7 @@
 import { body } from 'express-validator';
 
 export const createLibraryRequestBodyValidator = [
-    body('name').notEmpty().withMessage('Library name is required').trim().escape(),
+    body('libraryName').notEmpty().withMessage('Library name is required').trim().escape(),
     body('address').notEmpty().withMessage('Library address is required').trim().escape(),
     body('contactNumber')
         .notEmpty()
@@ -15,7 +15,7 @@ export const createLibraryRequestBodyValidator = [
 ];
 
 export const updateLibraryRequestBodyValidator = [
-    body('name').optional().notEmpty().withMessage('Library name cannot be empty').trim().escape(),
+    body('libraryName').optional().notEmpty().withMessage('Library name cannot be empty').trim().escape(),
     body('address').optional().notEmpty().withMessage('Library address cannot be empty').trim().escape(),
     body('contactNumber')
         .optional()

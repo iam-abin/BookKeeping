@@ -1,12 +1,10 @@
 export interface BookDto {
     title: string;
-    author: string;
-    library: string;
+    authorId: string;
+    libraryId: string;
     coverImageUrl: string;
+    numberOfCopies: number;
 }
 
 export type CreateBookDto = BookDto;
-
-export interface UpdateBookDto extends BookDto {
-    borrower?: string;
-}
+export type UpdateBookDto = BookDto;

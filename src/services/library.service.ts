@@ -22,7 +22,10 @@ export class LibraryService {
         return library;
     }
 
-    public async updateLibrary(libraryId: string, updateLibraryDto: Partial<UpdateLibraryDto>): Promise<ILibrary | null> {
+    public async updateLibrary(
+        libraryId: string,
+        updateLibraryDto: Partial<UpdateLibraryDto>,
+    ): Promise<ILibrary | null> {
         const library: ILibrary | null = await libraryRepository.updateLibrary(libraryId, updateLibraryDto);
         return library;
     }

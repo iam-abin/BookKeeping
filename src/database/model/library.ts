@@ -1,7 +1,7 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
 export interface ILibrary extends Document {
-    name: string;
+    libraryName: string;
     address: string;
     contactNumber: string;
     createdAt: Date;
@@ -10,7 +10,7 @@ export interface ILibrary extends Document {
 
 const LibrarySchema: Schema = new Schema(
     {
-        name: { type: String, required: true },
+        libraryName: { type: String, required: true },
         address: { type: String, required: true },
         contactNumber: { type: String, required: true },
     },

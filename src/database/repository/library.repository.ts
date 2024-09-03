@@ -17,13 +17,24 @@ export class LibraryRepository {
         return library;
     }
 
-    async updateLibrary(libraryId: string, libraryUpdateData?: Partial<UpdateLibraryDto>): Promise<ILibrary | null> {
-        const updatedLibrary = await LibraryModel.findByIdAndUpdate(libraryId, { ...libraryUpdateData }, { new: true });
+    async updateLibrary(
+        libraryId: string,
+        libraryUpdateData?: Partial<UpdateLibraryDto>,
+    ): Promise<ILibrary | null> {
+        const updatedLibrary = await LibraryModel.findByIdAndUpdate(
+            libraryId,
+            { ...libraryUpdateData },
+            { new: true },
+        );
         return updatedLibrary;
     }
 
     async deleteLibrary(libraryId: string): Promise<ILibrary | null> {
-        const deletedlibrary = await LibraryModel.findByIdAndUpdate(libraryId, { isDeleted: true }, { new: true });
+        const deletedlibrary = await LibraryModel.findByIdAndUpdate(
+            libraryId,
+            { isDeleted: true },
+            { new: true },
+        );
         return deletedlibrary;
     }
 }

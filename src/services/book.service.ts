@@ -1,9 +1,11 @@
-import { IBook } from '../database/model';
-import { BookRepository } from '../database/repository';
+import { IBook, ILibrary } from '../database/model';
+import { BookRepository, LibraryRepository } from '../database/repository';
 import { CreateBookDto, UpdateBookDto } from '../dto/book.dto';
 import { NotFoundError } from '../errors';
 
 const bookRepository = new BookRepository();
+const libraryRepository = new LibraryRepository();
+
 
 export class BookService {
     public async getAllBooks(): Promise<IBook[] | []> {
@@ -18,6 +20,10 @@ export class BookService {
     }
 
     public async createBook(createBookDto: CreateBookDto): Promise<IBook> {
+        const {libraryId} = createBookDto
+        const library: ILibrary | null = await libraryRepository.findById(libraryId);
+        if (!library) throw new NotFoundError('Library not found');
+     
         const book: IBook = await bookRepository.createBook(createBookDto);
         return book;
     }

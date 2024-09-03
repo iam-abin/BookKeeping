@@ -1,23 +1,22 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
-export interface IBook extends Document {
-    title: string;
-    authorId: Schema.Types.ObjectId;
+export interface IBorrow extends Document {
+    bookId: Schema.Types.ObjectId;
+    borrowerId: Schema.Types.ObjectId;
     libraryId: Schema.Types.ObjectId;
-    coverImageUrl: string;
-    numberOfCopies: number;
-    isDeleted: boolean;
+    isReturned: boolean
 }
 
-const bookSchema = new Schema<IBook>(
+const borrowSchema = new Schema<IBorrow>(
     {
-        title: {
-            type: String,
-            required: true,
-        },
-        authorId: {
+        bookId: {
             type: Schema.Types.ObjectId,
             required: true,
+            ref: 'Book',
+        },
+        borrowerId: {
+            type: Schema.Types.ObjectId,
+            default: null,
             ref: 'User',
         },
         libraryId: {
@@ -25,15 +24,7 @@ const bookSchema = new Schema<IBook>(
             required: true,
             ref: 'Library',
         },
-        coverImageUrl: {
-            type: String,
-            required: true,
-        },
-        numberOfCopies: {
-            type: Number,
-            default: 1
-        },
-        isDeleted: {
+        isReturned: {
             type: Boolean,
             default: false,
         },
@@ -48,4 +39,4 @@ const bookSchema = new Schema<IBook>(
     },
 );
 
-export const BookModel = mongoose.model<IBook>('Book', bookSchema);
+export const BorrowModel = mongoose.model<IBorrow>('Borrow', borrowSchema);
