@@ -1,5 +1,5 @@
-import { IBorrow, IInventory, ILibrary } from '../database/model';
-import { InventoryRepository, LibraryRepository } from '../database/repository';
+import { IBook, IBorrow, IInventory, ILibrary } from '../database/model';
+import { BookRepository, InventoryRepository, LibraryRepository } from '../database/repository';
 import { BorrowBookDto } from '../dto/borrow.dto';
 import { CreateLibraryDto, UpdateLibraryDto } from '../dto/library.dto';
 import { BadRequestError, NotFoundError } from '../errors';
@@ -9,6 +9,7 @@ import { BorrowRepository } from '../database/repository/borrow.repository';
 const libraryRepository = new LibraryRepository();
 const inventoryRepository = new InventoryRepository();
 const borrowRepository = new BorrowRepository();
+const bookRepository = new BookRepository();
 
 export class LibraryService {
     public async getAllLibraries(): Promise<ILibrary[] | []> {
@@ -21,6 +22,36 @@ export class LibraryService {
         if (!library) throw new NotFoundError('Library not found');
         if (library.isDeleted) throw new BadRequestError('This is a deleted Library');
         return library;
+    }
+
+    public async getAllDetailsOfLibrary(
+        libraryId: string,
+    ): Promise<{ library: ILibrary | null; libraryBooksDetails: IBorrow[] | null }> {
+        const library: ILibrary | null = await libraryRepository.findLibraryById(libraryId);
+        if (!library) throw new NotFoundError('Library not found');
+        if (library.isDeleted) throw new BadRequestError('This is a deleted Library');
+
+        const libraryBooksDetails: IBorrow[] | null = await borrowRepository.findByLibraryId(libraryId);
+
+        return { library, libraryBooksDetails };
+    }
+
+    public async getAllDetailsOfALibraryBook(
+        libraryId: string,
+        bookId: string,
+    ): Promise<{ library: ILibrary; book: IBook | null; borrowersOfBook: IBorrow[] | null }> {
+        const book: IBook | null = await bookRepository.findById(bookId);
+        if (!book) throw new NotFoundError('Book not found');
+        const library: ILibrary | null = await libraryRepository.findLibraryById(libraryId);
+        if (!library) throw new NotFoundError('Library not found');
+        if (library.isDeleted) throw new BadRequestError('This is a deleted Library');
+
+        const borrowersOfBook: IBorrow[] | null = await borrowRepository.findByLibraryAndBookId(
+            libraryId,
+            bookId,
+        );
+
+        return { library, book, borrowersOfBook };
     }
 
     public async createLibrary(createLibraryDto: CreateLibraryDto): Promise<ILibrary> {

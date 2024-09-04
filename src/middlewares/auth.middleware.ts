@@ -1,5 +1,5 @@
-import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import { Request, Response, NextFunction } from 'express';
 import { ForbiddenError, NotAuthorizedError } from '../errors';
 import { config } from '../config/config';
 import { UserRole } from '../utils/roles';

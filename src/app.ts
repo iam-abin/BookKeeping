@@ -5,6 +5,7 @@ import morgan from 'morgan';
 import cors from 'cors';
 import { NotFoundError } from './errors';
 import { errorHandler } from './middlewares';
+import { rateLimiter } from './middlewares';
 import { config } from './config/config';
 import borrowRoutes from './routes/borrow';
 import userRoutes from './routes/user';
@@ -17,13 +18,17 @@ const isProductionENV: boolean = process.env.NODE_ENV === 'production';
 
 // Middlewares
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 app.use(helmet());
 app.use(
     cors({
         origin: '*',
+        methods: "GET,POST,PUT,PATCH,DELETE",
     }),
 );
+app.use(rateLimiter);
+
+// Http logger middlewares
 if (!isProductionENV) app.use(morgan('dev'));
 
 // Routes

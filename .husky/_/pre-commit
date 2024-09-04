@@ -1,2 +1,4 @@
 #!/usr/bin/env sh
-npm run lint:fix && npm run format
+. "$(dirname "$0")/h"
+
+npm run precommit

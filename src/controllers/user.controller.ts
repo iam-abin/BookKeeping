@@ -19,7 +19,7 @@ const signin = async (req: Request, res: Response): Promise<void> => {
         email: user.email,
         role: user.role,
     };
-    const jwt = createJwtAccessToken(userPayload);
+    const jwt: string = createJwtAccessToken(userPayload);
     res.status(201).json({ user, accessToken: jwt });
 };
 
