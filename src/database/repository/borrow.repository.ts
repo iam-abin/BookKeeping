@@ -18,12 +18,12 @@ export class BorrowRepository {
     }
 
     async findByLibraryId(libraryId: string): Promise<IBorrow[] | null> {
-        const borrowedBook = await BorrowModel.find({libraryId}).populate('borrowerId').populate('bookId');
+        const borrowedBook = await BorrowModel.find({ libraryId }).populate('borrowerId').populate('bookId');
         return borrowedBook;
     }
 
     async findByLibraryAndBookId(libraryId: string, bookId: string): Promise<IBorrow[] | null> {
-        const bookBorrowDetails = await BorrowModel.find({libraryId, bookId}).populate('borrowerId');
+        const bookBorrowDetails = await BorrowModel.find({ libraryId, bookId }).populate('borrowerId');
         return bookBorrowDetails;
     }
 }

@@ -39,14 +39,17 @@ export class LibraryService {
     public async getAllDetailsOfALibraryBook(
         libraryId: string,
         bookId: string,
-    ): Promise<{ library: ILibrary, book: IBook | null; borrowersOfBook: IBorrow[] | null }> {
+    ): Promise<{ library: ILibrary; book: IBook | null; borrowersOfBook: IBorrow[] | null }> {
         const book: IBook | null = await bookRepository.findById(bookId);
         if (!book) throw new NotFoundError('Book not found');
         const library: ILibrary | null = await libraryRepository.findLibraryById(libraryId);
         if (!library) throw new NotFoundError('Library not found');
         if (library.isDeleted) throw new BadRequestError('This is a deleted Library');
 
-        const borrowersOfBook: IBorrow[] | null = await borrowRepository.findByLibraryAndBookId(libraryId, bookId);
+        const borrowersOfBook: IBorrow[] | null = await borrowRepository.findByLibraryAndBookId(
+            libraryId,
+            bookId,
+        );
 
         return { library, book, borrowersOfBook };
     }

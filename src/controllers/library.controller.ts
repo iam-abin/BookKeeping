@@ -20,12 +20,14 @@ const getLibraryDetailsById = async (req: Request, res: Response): Promise<void>
 
 const getALibraryBookDetails = async (req: Request, res: Response): Promise<void> => {
     const { id, libraryId } = req.params;
-    const book: { library: ILibrary, book: IBook | null; borrowersOfBook: IBorrow[] | null } = await libraryService.getAllDetailsOfALibraryBook(libraryId, id );
+    const book: { library: ILibrary; book: IBook | null; borrowersOfBook: IBorrow[] | null } =
+        await libraryService.getAllDetailsOfALibraryBook(libraryId, id);
     res.status(200).json(book);
 };
 
 const getLibraryById = async (req: Request, res: Response): Promise<void> => {
     const { id: libraryId } = req.params;
+    let a: any;
     const library: ILibrary = await libraryService.getLibraryById(libraryId);
     res.status(200).json(library);
 };
