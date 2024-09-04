@@ -1,5 +1,5 @@
 import { body } from 'express-validator';
-import { validateRequest } from '../middlewares';
+import { UserRole } from '../roles';
 
 export const signinRequestBodyValidator = [
     body('email').isEmail().withMessage('Email must be valid').trim().escape(),
@@ -12,8 +12,13 @@ export const signupRequestBodyValidator = [
     body('email').isEmail().withMessage('Email must be valid').trim().escape(),
     body('password')
         .trim()
-        .isLength({ min: 4 })
+        .isLength({ min: 4, max: 20 })
         .withMessage('Password must be between 4 and 20 characters')
+        .trim()
         .escape(),
-    // validateRequest,
+    body('role')
+        .notEmpty()
+        .withMessage('Role is required')
+        .isIn(Object.values(UserRole)) // Ensures that the role is one of the predefined values
+        .withMessage(`Role must be one of: ${Object.values(UserRole).join(', ')}`),
 ];

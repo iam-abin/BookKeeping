@@ -5,8 +5,6 @@ import { winstonLogError } from '../utils';
 export const errorHandler = (err: Error, req: Request, res: Response, next: NextFunction) => {
     const isProduction = process.env.NODE_ENV === 'production';
 
-    console.log('isProduction ', isProduction, process.env.NODE_ENV);
-
     // log the error details to the error.log file
     winstonLogError(err);
 
