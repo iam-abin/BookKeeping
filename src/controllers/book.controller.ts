@@ -20,6 +20,8 @@ const createBook = async (req: Request, res: Response): Promise<void> => {
     const { userId } = req.user!;
     console.log('file is', req.file!);
 
+    const name = "abin"
+
     const book: IBook = await bookService.createBook(req.body as CreateBookDto, userId, req.file!);
     res.status(201).json(book);
 };
