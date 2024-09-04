@@ -20,8 +20,6 @@ const createBook = async (req: Request, res: Response): Promise<void> => {
     const { userId } = req.user!;
     console.log('file is', req.file!);
 
-    const name = 'abin';
-
     const book: IBook = await bookService.createBook(req.body as CreateBookDto, userId, req.file!);
     res.status(201).json(book);
 };
@@ -41,6 +39,7 @@ const updateBook = async (req: Request, res: Response): Promise<void> => {
 const deleteBook = async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
     const { userId } = req.user!;
+    let a: any;
     const book: IBook | null = await bookService.deleteBook(id, userId);
     res.status(200).json(book);
 };
