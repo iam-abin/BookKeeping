@@ -39,7 +39,6 @@ const updateBook = async (req: Request, res: Response): Promise<void> => {
 const deleteBook = async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
     const { userId } = req.user!;
-    let a: any;
     const book: IBook | null = await bookService.deleteBook(id, userId);
     res.status(200).json(book);
 };

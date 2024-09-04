@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { LibraryService } from '../services';
-import { IBorrow, ILibrary } from '../database/model';
+import { IBook, IBorrow, ILibrary } from '../database/model';
 import { CreateLibraryDto, UpdateLibraryDto } from '../dto/library.dto';
 import { BorrowBookDto, ReturnBookDto } from '../dto/borrow.dto';
 
@@ -13,7 +13,20 @@ const listAllLibraries = async (req: Request, res: Response): Promise<void> => {
 
 const getLibraryDetailsById = async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
-    const library: ILibrary = await libraryService.getLibraryById(id);
+    const library: { library: ILibrary | null; libraryBooksDetails: IBorrow[] | null } =
+        await libraryService.getAllDetailsOfLibrary(id);
+    res.status(200).json(library);
+};
+
+const getALibraryBookDetails = async (req: Request, res: Response): Promise<void> => {
+    const { id, libraryId } = req.params;
+    const book: { library: ILibrary, book: IBook | null; borrowersOfBook: IBorrow[] | null } = await libraryService.getAllDetailsOfALibraryBook(libraryId, id );
+    res.status(200).json(book);
+};
+
+const getLibraryById = async (req: Request, res: Response): Promise<void> => {
+    const { id: libraryId } = req.params;
+    const library: ILibrary = await libraryService.getLibraryById(libraryId);
     res.status(200).json(library);
 };
 
@@ -51,6 +64,8 @@ const returnBook = async (req: Request, res: Response): Promise<void> => {
 export default {
     listAllLibraries,
     getLibraryDetailsById,
+    getALibraryBookDetails,
+    getLibraryById,
     createLibrary,
     updateLibrary,
     deleteLibrary,

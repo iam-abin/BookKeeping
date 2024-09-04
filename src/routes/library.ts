@@ -10,7 +10,13 @@ import { addToInventoryRequestBodyValidator } from '../utils/validation/inventor
 const router: Router = express.Router();
 
 router.get('/', libraryController.listAllLibraries);
-router.get('/:id', libraryController.getLibraryDetailsById);
+// In this application admin is creating the library and so he can access 
+// Books owned by the Library
+// Borrowers associated with each book
+router.get('/:id', auth(UserRole.ADMIN), libraryController.getLibraryDetailsById);
+
+// router.get('/:id', libraryController.getLibraryById);
+
 
 router.post('/', auth(UserRole.ADMIN), createLibraryRequestBodyValidator, libraryController.createLibrary);
 
