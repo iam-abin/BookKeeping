@@ -25,13 +25,6 @@ const getALibraryBookDetails = async (req: Request, res: Response): Promise<void
     res.status(200).json(book);
 };
 
-const getLibraryById = async (req: Request, res: Response): Promise<void> => {
-    const { id: libraryId } = req.params;
-    let a: any;
-    const library: ILibrary = await libraryService.getLibraryById(libraryId);
-    res.status(200).json(library);
-};
-
 const createLibrary = async (req: Request, res: Response): Promise<void> => {
     const library: ILibrary = await libraryService.createLibrary(req.body as CreateLibraryDto);
     res.status(201).json(library);
@@ -67,7 +60,6 @@ export default {
     listAllLibraries,
     getLibraryDetailsById,
     getALibraryBookDetails,
-    getLibraryById,
     createLibrary,
     updateLibrary,
     deleteLibrary,

@@ -20,7 +20,7 @@ const signin = async (req: Request, res: Response): Promise<void> => {
         role: user.role,
     };
     const jwt: string = createJwtAccessToken(userPayload);
-    res.status(201).json({ user, accessToken: jwt });
+    res.status(200).json({ user, accessToken: jwt });
 };
 
 export default { signup, signin };

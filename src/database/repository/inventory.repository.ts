@@ -12,6 +12,7 @@ export class InventoryRepository {
         const book: IInventory | null = await InventoryModel.findOne({
             libraryId,
             bookId,
+            isDeleted: false,
         });
 
         return book;
@@ -43,7 +44,7 @@ export class InventoryRepository {
     async deleteInventoryItem(libraryId: string, bookId: string): Promise<IInventory | null> {
         const deletedBook: IInventory | null = await InventoryModel.findOneAndUpdate(
             { libraryId, bookId },
-            { isDeleted: true, numberOfCopies: 0 },
+            { isDeleted: true },
             { new: true },
         );
         return deletedBook;

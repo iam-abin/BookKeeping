@@ -12,15 +12,13 @@ const getAllBooks = async (req: Request, res: Response): Promise<void> => {
 
 const getABook = async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
-    const book: IBook = await bookService.getABookById(id);
+    const book: IBook | null = await bookService.getABookById(id);
     res.status(200).json(book);
 };
 
 const createBook = async (req: Request, res: Response): Promise<void> => {
     const { userId } = req.user!;
-    console.log('file is', req.file!);
-
-    const book: IBook = await bookService.createBook(req.body as CreateBookDto, userId, req.file!);
+    const book: IBook | null = await bookService.createBook(req.body as CreateBookDto, userId, req.file!);
     res.status(201).json(book);
 };
 

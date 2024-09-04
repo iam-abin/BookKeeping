@@ -15,8 +15,6 @@ router.get('/', libraryController.listAllLibraries);
 // Borrowers associated with each book
 router.get('/:id', auth(UserRole.ADMIN), libraryController.getLibraryDetailsById);
 
-// router.get('/:id', libraryController.getLibraryById);
-
 router.post('/', auth(UserRole.ADMIN), createLibraryRequestBodyValidator, libraryController.createLibrary);
 
 router.put('/:id', auth(UserRole.ADMIN), updateLibraryRequestBodyValidator, libraryController.updateLibrary);
