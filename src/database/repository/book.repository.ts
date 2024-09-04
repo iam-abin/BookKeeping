@@ -2,8 +2,8 @@ import { CreateBookDto, UpdateBookDto } from '../../dto/book.dto';
 import { BookModel, IBook } from '../model';
 
 export class BookRepository {
-    async createBook(bookData: CreateBookDto, authorId: string): Promise<IBook> {
-        const book = await BookModel.create({ ...bookData, authorId });
+    async createBook(bookData: CreateBookDto): Promise<IBook> {
+        const book = await BookModel.create(bookData);
         return book;
     }
 

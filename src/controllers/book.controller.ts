@@ -18,14 +18,21 @@ const getABook = async (req: Request, res: Response): Promise<void> => {
 
 const createBook = async (req: Request, res: Response): Promise<void> => {
     const { userId } = req.user!;
-    const book: IBook = await bookService.createBook(req.body as CreateBookDto, userId);
+    console.log('file is', req.file!);
+
+    const book: IBook = await bookService.createBook(req.body as CreateBookDto, userId, req.file!);
     res.status(201).json(book);
 };
 
 const updateBook = async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
     const { userId } = req.user!;
-    const book: IBook | null = await bookService.updateBook(id, userId, req.body as Partial<UpdateBookDto>);
+    const book: IBook | null = await bookService.updateBook(
+        id,
+        userId,
+        req.body as Partial<UpdateBookDto>,
+        req.file!,
+    );
     res.status(200).json(book);
 };
 

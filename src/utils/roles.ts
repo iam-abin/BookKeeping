@@ -1,10 +1,6 @@
 export enum UserRole {
     ADMIN = 'Admin',
-    LIBRARY = 'library',
+    // LIBRARY = 'library',
     AUTHOR = 'author',
     BORROWER = 'borrower',
 }
-
-// const checkAdmin = (adminDetails)=>{
-
-// }
