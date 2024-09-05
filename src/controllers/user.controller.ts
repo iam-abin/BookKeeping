@@ -3,6 +3,7 @@ import { AuthService } from '../services';
 import { UserRegisterDto, UserSignInDto } from '../dto/user.dto';
 import { IUser } from '../database/model';
 import { createJwtAccessToken } from '../utils';
+import transformResponse from '../utils/response';
 
 const authService = new AuthService();
 
@@ -12,6 +13,8 @@ const signup = async (req: Request, res: Response): Promise<void> => {
 };
 
 const signin = async (req: Request, res: Response): Promise<void> => {
+    throw new Error()
+
     const user: IUser = await authService.signIn(req.body as UserSignInDto);
     const userPayload = {
         userId: user._id as string,
@@ -20,7 +23,7 @@ const signin = async (req: Request, res: Response): Promise<void> => {
         role: user.role,
     };
     const jwt: string = createJwtAccessToken(userPayload);
-    res.status(200).json({ user, accessToken: jwt });
+    res.status(200).json(transformResponse(true, "login success", { user, accessToken: jwt }, null));
 };
 
 export default { signup, signin };

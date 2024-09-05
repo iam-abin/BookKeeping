@@ -14,7 +14,7 @@ export class BookService {
 
     public async getABookById(bookId: string): Promise<IBook> {
         const book: IBook | null = await bookRepository.findById(bookId);
-        if (!book) throw new NotFoundError('Book not found');
+        if (!book) throw new NotFoundError('This book does not exist');
         return book;
     }
 
@@ -43,7 +43,7 @@ export class BookService {
         imageFile: Express.Multer.File,
     ): Promise<IBook | null> {
         const book: IBook | null = await bookRepository.findById(bookId);
-        if (!book) throw new NotFoundError('Book not found');
+        if (!book) throw new NotFoundError('This book does not exist');
 
         if (authorId != (book.authorId as IUser)._id) throw new ForbiddenError('You cant modify others book');
 
@@ -63,7 +63,7 @@ export class BookService {
 
     public async deleteBook(bookId: string, authorId: string): Promise<IBook | null> {
         const book: IBook | null = await bookRepository.findById(bookId);
-        if (!book) throw new NotFoundError('Book not found');
+        if (!book) throw new NotFoundError('This book does not exist');
 
         if (authorId != (book.authorId as IUser)._id) throw new ForbiddenError('You cant delete others book');
 

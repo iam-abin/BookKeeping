@@ -61,7 +61,7 @@ export class LibraryService {
     ): Promise<ILibrary | null> {
         const library: ILibrary | null = await libraryRepository.findLibraryById(libraryId);
         if (!library) throw new NotFoundError('Library not found');
-        if (library.isDeleted) throw new BadRequestError('Library already deleted');
+        if (library.isDeleted) throw new BadRequestError('This is a deleted Library');
         const updatedLibrary: ILibrary | null = await libraryRepository.updateLibrary(
             libraryId,
             updateLibraryDto,

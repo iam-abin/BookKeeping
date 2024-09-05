@@ -11,6 +11,8 @@ import borrowRoutes from './routes/borrow';
 import userRoutes from './routes/user';
 import bookRoutes from './routes/book';
 import libraryRoutes from './routes/library';
+import { i18nInstance } from './config/translation';
+
 
 const app: Application = express();
 
@@ -27,6 +29,7 @@ app.use(
     }),
 );
 app.use(rateLimiter);
+app.use(i18nInstance.init);
 
 // Http logger middlewares
 if (!isProductionENV) app.use(morgan('dev'));

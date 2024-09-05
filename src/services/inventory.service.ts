@@ -24,7 +24,7 @@ export class InventoryService {
         numberOfCopies: number,
     ): Promise<IInventory | null> {
         const book: IBook | null = await bookRepository.findById(bookId);
-        if (!book) throw new NotFoundError('Book not found');
+        if (!book) throw new NotFoundError('This book does not exist');
 
         // Here the book is deleted means It is not available in the market.
         if (book.isDeleted) throw new BadRequestError('Book not available currently');
