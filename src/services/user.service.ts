@@ -1,7 +1,7 @@
 import { IUser } from '../database/model';
 import { UserRepository } from '../database/repository';
 import { UserRegisterDto, UserSignInDto } from '../dto/user.dto';
-import { BadRequestError } from '../errors/badrequest.error';
+import { BadRequestError } from '../errors';
 import { comparePassword } from '../utils';
 
 const userRepository = new UserRepository();
@@ -12,7 +12,6 @@ export class AuthService {
 
         const existingUser: IUser | null = await userRepository.findByEmail(email);
         if (existingUser) throw new BadRequestError('User already exists');
-
 
         const createdUser = await userRepository.createUser(userRegisterDto);
         return createdUser;

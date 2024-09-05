@@ -1,0 +1,18 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+
+# Run linting and formatting, exit if either fails
+npm run lint:fix && npm run format
+
+# Check if previous commands were successful
+if [ $? -ne 0 ]; then
+  echo "✖ Linting or formatting failed. Fix the issues before committing."
+  exit 1
+fi
+
+# Stage all changes
+git add --all
+
+# If everything is okay
+exit 0

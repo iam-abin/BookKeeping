@@ -14,7 +14,7 @@ export class BookService {
 
     public async getABookById(bookId: string): Promise<IBook> {
         const book: IBook | null = await bookRepository.findById(bookId);
-        if (!book) throw new NotFoundError('Book not found');
+        if (!book) throw new NotFoundError('This book does not exist');
         return book;
     }
 
@@ -23,15 +23,15 @@ export class BookService {
         authorId: string,
         imageFile: Express.Multer.File,
     ): Promise<IBook> {
-        const { title } = createBookDto;
         if (!imageFile) throw new BadRequestError('Should add a coverImage');
 
+        const { title } = createBookDto;
         const book: IBook | null = await bookRepository.findByTitle(title);
         if (book) throw new BadRequestError('Book already exist');
 
         const imageUrl: string = await uploadImage(imageFile, authorId);
         createBookDto.coverImageUrl = imageUrl;
-        createBookDto.coverImageUrl = authorId;
+        createBookDto.authorId = authorId;
         const createdBook: IBook = await bookRepository.createBook(createBookDto);
         return createdBook;
     }
@@ -43,7 +43,7 @@ export class BookService {
         imageFile: Express.Multer.File,
     ): Promise<IBook | null> {
         const book: IBook | null = await bookRepository.findById(bookId);
-        if (!book) throw new NotFoundError('Book not found');
+        if (!book) throw new NotFoundError('This book does not exist');
 
         if (authorId != (book.authorId as IUser)._id) throw new ForbiddenError('You cant modify others book');
 
@@ -51,20 +51,20 @@ export class BookService {
             const imageUrl: string = await uploadImage(imageFile, authorId);
             updateBookDto.coverImageUrl = imageUrl;
         }
-        const updatedBook: IBook | null = await bookRepository.updateBook(bookId, updateBookDto);
+        // Remove fields with empty values 'eg: if we do not add title and when updating, it will be like title: "". '
+        const filteredUpdateDto = Object.fromEntries(
+            Object.entries(updateBookDto).filter(([_, value]) => value),
+        );
+
+        const updatedBook: IBook | null = await bookRepository.updateBook(bookId, filteredUpdateDto);
         if (!updatedBook) throw new BadRequestError('This book does not exist');
         return updatedBook;
     }
 
     public async deleteBook(bookId: string, authorId: string): Promise<IBook | null> {
         const book: IBook | null = await bookRepository.findById(bookId);
-        if (!book) throw new NotFoundError('Book not found');
-
-        console.log('book.authorId.toString()', book.authorId.toString());
-        console.log('(book.authorId as IUser)._id', (book.authorId as IUser)._id);
-        console.log('authorId ', authorId);
-        console.log('authorId != book.authorId.toString()', authorId != (book.authorId as IUser)._id);
-        console.log('authorId !== book.authorId.toString()', authorId !== (book.authorId as IUser)._id);
+        if (!book) throw new NotFoundError('This book does not exist');
+        if (book.isDeleted) throw new BadRequestError('This book is already deleted');
 
         if (authorId != (book.authorId as IUser)._id) throw new ForbiddenError('You cant delete others book');
 

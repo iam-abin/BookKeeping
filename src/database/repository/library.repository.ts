@@ -22,15 +22,14 @@ export class LibraryRepository {
         libraryId: string,
         libraryUpdateData?: Partial<UpdateLibraryDto>,
     ): Promise<ILibrary | null> {
-        const updatedLibrary = await LibraryModel.findByIdAndUpdate(
-            libraryId,
-            { ...libraryUpdateData },
-            { new: true },
-        );
+        const updatedLibrary = await LibraryModel.findByIdAndUpdate(libraryId, libraryUpdateData, {
+            new: true,
+        });
         return updatedLibrary;
     }
 
     async deleteLibrary(libraryId: string): Promise<ILibrary | null> {
+        // Soft delete library
         const deletedlibrary = await LibraryModel.findByIdAndUpdate(
             libraryId,
             { isDeleted: true },

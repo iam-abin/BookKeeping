@@ -6,6 +6,7 @@ export default tseslint.config(
   eslint.configs.recommended,
   ...tseslint.configs.recommended,
   prettier,
+  
   {
     ignores: ['node_modules', 'build'],
     languageOptions: {

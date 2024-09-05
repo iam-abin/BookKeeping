@@ -9,5 +9,3 @@ router.post('/register', signupRequestBodyValidator, validateRequest, authContro
 router.post('/login', signinRequestBodyValidator, validateRequest, authController.signin);
 
 export default router;
-
-// authors, library, borrower

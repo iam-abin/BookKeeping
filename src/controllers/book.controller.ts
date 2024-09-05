@@ -2,26 +2,27 @@ import { Request, Response } from 'express';
 import { BookService } from '../services';
 import { IBook } from '../database/model';
 import { CreateBookDto, UpdateBookDto } from '../dto/book.dto';
+import transformSuccessResponse from '../utils/response';
 
 const bookService = new BookService();
 
 const getAllBooks = async (req: Request, res: Response): Promise<void> => {
     const books: IBook[] | [] = await bookService.getAllBooks();
-    res.status(200).json(books);
+
+    res.status(200).json(transformSuccessResponse('All the Books are', { books }));
 };
 
 const getABook = async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
-    const book: IBook = await bookService.getABookById(id);
-    res.status(200).json(book);
+    const book: IBook | null = await bookService.getABookById(id);
+    res.status(200).json(transformSuccessResponse('Requested book is', { book }));
 };
 
 const createBook = async (req: Request, res: Response): Promise<void> => {
     const { userId } = req.user!;
-    console.log('file is', req.file!);
-
-    const book: IBook = await bookService.createBook(req.body as CreateBookDto, userId, req.file!);
-    res.status(201).json(book);
+    console.log('req.body ', req.body);
+    const book: IBook | null = await bookService.createBook(req.body as CreateBookDto, userId, req.file!);
+    res.status(201).json(transformSuccessResponse('Book created successfully', { book }));
 };
 
 const updateBook = async (req: Request, res: Response): Promise<void> => {
@@ -33,14 +34,14 @@ const updateBook = async (req: Request, res: Response): Promise<void> => {
         req.body as Partial<UpdateBookDto>,
         req.file!,
     );
-    res.status(200).json(book);
+    res.status(200).json(transformSuccessResponse('Book updated successfully', { book }));
 };
 
 const deleteBook = async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
     const { userId } = req.user!;
     const book: IBook | null = await bookService.deleteBook(id, userId);
-    res.status(200).json(book);
+    res.status(200).json(transformSuccessResponse('Book deleted successfully', { book }));
 };
 
 export default { getAllBooks, getABook, createBook, updateBook, deleteBook };

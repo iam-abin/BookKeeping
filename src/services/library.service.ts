@@ -5,6 +5,7 @@ import { CreateLibraryDto, UpdateLibraryDto } from '../dto/library.dto';
 import { BadRequestError, NotFoundError } from '../errors';
 import { INVENTRY_ITEM_DECREMENT_COUNT, INVENTRY_ITEM_INCREMENT_COUNT } from '../utils/constants';
 import { BorrowRepository } from '../database/repository/borrow.repository';
+import { ILibraryDetailsResponse } from '../controllers/library.controller';
 
 const libraryRepository = new LibraryRepository();
 const inventoryRepository = new InventoryRepository();
@@ -17,21 +18,14 @@ export class LibraryService {
         return libraries;
     }
 
-    public async getLibraryById(libraryId: string): Promise<ILibrary> {
-        const library: ILibrary | null = await libraryRepository.findLibraryById(libraryId);
-        if (!library) throw new NotFoundError('Library not found');
-        if (library.isDeleted) throw new BadRequestError('This is a deleted Library');
-        return library;
-    }
-
-    public async getAllDetailsOfLibrary(
-        libraryId: string,
-    ): Promise<{ library: ILibrary | null; libraryBooksDetails: IBorrow[] | null }> {
+    public async getAllDetailsOfLibrary(libraryId: string): Promise<ILibraryDetailsResponse> {
         const library: ILibrary | null = await libraryRepository.findLibraryById(libraryId);
         if (!library) throw new NotFoundError('Library not found');
         if (library.isDeleted) throw new BadRequestError('This is a deleted Library');
 
-        const libraryBooksDetails: IBorrow[] | null = await borrowRepository.findByLibraryId(libraryId);
+        // const libraryBooksDetails: IBorrow[] | null = await borrowRepository.findByLibraryId(libraryId);
+        const libraryBooksDetails: IInventory[] | [] =
+            await inventoryRepository.getInventoryByLibraryId(libraryId);
 
         return { library, libraryBooksDetails };
     }
@@ -68,7 +62,7 @@ export class LibraryService {
     ): Promise<ILibrary | null> {
         const library: ILibrary | null = await libraryRepository.findLibraryById(libraryId);
         if (!library) throw new NotFoundError('Library not found');
-        if (library.isDeleted) throw new BadRequestError('Library already deleted');
+        if (library.isDeleted) throw new BadRequestError('This is a deleted Library');
         const updatedLibrary: ILibrary | null = await libraryRepository.updateLibrary(
             libraryId,
             updateLibraryDto,
@@ -93,7 +87,8 @@ export class LibraryService {
             libraryId,
             bookId,
         );
-        if (!bookItem) throw new NotFoundError('Book Items not found In this Library');
+        if (!bookItem) throw new NotFoundError('Book not found In this Library');
+        if (bookItem.isDeleted) throw new NotFoundError('Book is not available to borrow now');
 
         // Check if there are enough copies available
         if (bookItem.numberOfCopies <= 0) throw new BadRequestError('No copies available for borrowing');
@@ -109,11 +104,11 @@ export class LibraryService {
 
     public async returnBook(libraryId: string, bookId: string, borrowerId: string): Promise<IBorrow | null> {
         // We can also use transaction here for consistency since we are doing 2 update operation in inventory and borrow
-        const updatedBorrow = await borrowRepository.returnBook(libraryId, bookId, borrowerId);
+        const bookReturned: IBorrow | null = await borrowRepository.returnBook(libraryId, bookId, borrowerId);
 
-        if (!updatedBorrow) throw new NotFoundError('Borrow record not found');
+        if (!bookReturned) throw new NotFoundError('Your borrow record is not found');
 
-        const updatedInventory = await inventoryRepository.updateInventoryItemCount(
+        const updatedInventory: IInventory | null = await inventoryRepository.updateInventoryItemCount(
             libraryId,
             bookId,
             INVENTRY_ITEM_INCREMENT_COUNT,
@@ -121,6 +116,6 @@ export class LibraryService {
 
         if (!updatedInventory) throw new NotFoundError('Inventory item not found');
 
-        return updatedBorrow;
+        return bookReturned;
     }
 }
