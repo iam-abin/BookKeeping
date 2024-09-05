@@ -35,13 +35,17 @@ export class InventoryRepository {
     ): Promise<IInventory | null> {
         const inventoryItem: IInventory | null = await InventoryModel.findOneAndUpdate(
             { libraryId, bookId },
-            { $inc: { numberOfCopies: updateCount } },
+            { $set: { isDeleted: false }, $inc: { numberOfCopies: updateCount } },
+            { new: true },
         ).exec(); // Use exec() to return a proper promise;
 
         return inventoryItem;
     }
 
     async deleteInventoryItem(libraryId: string, bookId: string): Promise<IInventory | null> {
+        // Soft delete book from inventory. Here numberOfCopies exists the same
+        // This deleted book wont be available to sale.
+        // Can be enabled in the future
         const deletedBook: IInventory | null = await InventoryModel.findOneAndUpdate(
             { libraryId, bookId },
             { isDeleted: true },

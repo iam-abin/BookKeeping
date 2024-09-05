@@ -35,6 +35,7 @@ export class BookRepository {
     }
 
     async deleteBook(bookId: string): Promise<IBook | null> {
+        // soft delete book
         const deletedBook = await BookModel.findByIdAndUpdate(bookId, { isDeleted: true }, { new: true });
         return deletedBook;
     }

@@ -20,10 +20,11 @@
     "This book does not exist": "This book does not exist",
     "Book not available currently": "Book not available currently",
     "Should add a cover image": "Should add a cover image",
-    "Book already exists": "Book already exists",
+    "Book already exist": "Book already exist",
     "You can't modify others' book": "You can't modify others' book",
     "You can't delete others' book": "You can't delete others' book",
     "Internal server error": "Internal server error",
     "Signup success, Please login": "Signup success, Please login",
-    "Login success": "Login success"
+    "Login success": "Login success",
+    "Role must be one of: admin, author, borrower": "Role must be one of: admin, author, borrower"
 }

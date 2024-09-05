@@ -10,6 +10,6 @@ export class ForbiddenError extends CustomError {
     }
 
     serializeErrors() {
-        return [{ message:  i18nInstance.__(this.message) }];
+        return [{ message: i18nInstance.__(this.message) }];
     }
 }

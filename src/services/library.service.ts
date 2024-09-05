@@ -5,6 +5,7 @@ import { CreateLibraryDto, UpdateLibraryDto } from '../dto/library.dto';
 import { BadRequestError, NotFoundError } from '../errors';
 import { INVENTRY_ITEM_DECREMENT_COUNT, INVENTRY_ITEM_INCREMENT_COUNT } from '../utils/constants';
 import { BorrowRepository } from '../database/repository/borrow.repository';
+import { ILibraryDetailsResponse } from '../controllers/library.controller';
 
 const libraryRepository = new LibraryRepository();
 const inventoryRepository = new InventoryRepository();
@@ -17,14 +18,14 @@ export class LibraryService {
         return libraries;
     }
 
-    public async getAllDetailsOfLibrary(
-        libraryId: string,
-    ): Promise<{ library: ILibrary | null; libraryBooksDetails: IBorrow[] | null }> {
+    public async getAllDetailsOfLibrary(libraryId: string): Promise<ILibraryDetailsResponse> {
         const library: ILibrary | null = await libraryRepository.findLibraryById(libraryId);
         if (!library) throw new NotFoundError('Library not found');
         if (library.isDeleted) throw new BadRequestError('This is a deleted Library');
 
-        const libraryBooksDetails: IBorrow[] | null = await borrowRepository.findByLibraryId(libraryId);
+        // const libraryBooksDetails: IBorrow[] | null = await borrowRepository.findByLibraryId(libraryId);
+        const libraryBooksDetails: IInventory[] | [] =
+            await inventoryRepository.getInventoryByLibraryId(libraryId);
 
         return { library, libraryBooksDetails };
     }

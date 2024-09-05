@@ -29,6 +29,7 @@ export class LibraryRepository {
     }
 
     async deleteLibrary(libraryId: string): Promise<ILibrary | null> {
+        // Soft delete library
         const deletedlibrary = await LibraryModel.findByIdAndUpdate(
             libraryId,
             { isDeleted: true },

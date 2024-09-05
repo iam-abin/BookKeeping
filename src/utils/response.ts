@@ -6,10 +6,7 @@ interface ISuccessResponse {
     data?: any;
 }
 
-const transformSuccessResponse = (
-    messageKey: string,
-    data?: any,
-): ISuccessResponse => {
+const transformSuccessResponse = (messageKey: string, data?: any): ISuccessResponse => {
     const message = i18nInstance.__(messageKey);
 
     const response: ISuccessResponse = {

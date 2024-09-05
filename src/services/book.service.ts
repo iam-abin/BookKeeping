@@ -64,6 +64,7 @@ export class BookService {
     public async deleteBook(bookId: string, authorId: string): Promise<IBook | null> {
         const book: IBook | null = await bookRepository.findById(bookId);
         if (!book) throw new NotFoundError('This book does not exist');
+        if (book.isDeleted) throw new BadRequestError('This book is already deleted');
 
         if (authorId != (book.authorId as IUser)._id) throw new ForbiddenError('You cant delete others book');
 

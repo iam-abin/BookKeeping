@@ -16,8 +16,6 @@ router.get('/', bookController.getAllBooks);
 router.get('/:id/:libraryId', auth(UserRole.ADMIN), libraryController.getALibraryBookDetails);
 
 router.post(
-
-    
     '/',
     auth(UserRole.AUTHOR),
     multerConfig.single('image'),
