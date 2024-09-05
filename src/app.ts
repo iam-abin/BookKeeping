@@ -13,7 +13,6 @@ import bookRoutes from './routes/book';
 import libraryRoutes from './routes/library';
 import { i18nInstance } from './config/translation';
 
-
 const app: Application = express();
 
 const isProductionENV: boolean = process.env.NODE_ENV === 'production';
@@ -25,7 +24,7 @@ app.use(helmet());
 app.use(
     cors({
         origin: '*',
-        methods: "GET,POST,PUT,PATCH,DELETE",
+        methods: 'GET,POST,PUT,PATCH,DELETE',
     }),
 );
 app.use(rateLimiter);

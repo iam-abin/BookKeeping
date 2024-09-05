@@ -13,7 +13,7 @@ const signup = async (req: Request, res: Response): Promise<void> => {
 };
 
 const signin = async (req: Request, res: Response): Promise<void> => {
-    throw new Error()
+    // throw new Error();
 
     const user: IUser = await authService.signIn(req.body as UserSignInDto);
     const userPayload = {
@@ -23,7 +23,7 @@ const signin = async (req: Request, res: Response): Promise<void> => {
         role: user.role,
     };
     const jwt: string = createJwtAccessToken(userPayload);
-    res.status(200).json(transformResponse(true, "login success", { user, accessToken: jwt }, null));
+    res.status(200).json(transformResponse(true, 'login success', { user, accessToken: jwt }));
 };
 
 export default { signup, signin };

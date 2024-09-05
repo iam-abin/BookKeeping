@@ -11,7 +11,7 @@ const transformResponse = (
     success: boolean,
     messageKey: string,
     data?: any,
-    error?: Error | unknown,
+    // error?: Error | unknown,
 ): IResponse => {
     const message = i18nInstance.__(messageKey);
 

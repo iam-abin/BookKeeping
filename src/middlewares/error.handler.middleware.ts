@@ -18,7 +18,9 @@ export const errorHandler = (err: Error, req: Request, res: Response, next: Next
     res.status(500).send({
         errors: [
             {
-                message: isProduction ? i18nInstance.__('Something went wrong!!!') : i18nInstance.__(err.message || 'Internal server error'),
+                message: isProduction
+                    ? i18nInstance.__('Something went wrong!!!')
+                    : i18nInstance.__(err.message || 'Internal server error'),
             },
         ],
     });
