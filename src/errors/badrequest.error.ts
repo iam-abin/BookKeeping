@@ -1,3 +1,4 @@
+import { i18nInstance } from '../config/translation';
 import { CustomError } from './custom.error';
 
 export class BadRequestError extends CustomError {
@@ -9,6 +10,6 @@ export class BadRequestError extends CustomError {
     }
 
     serializeErrors() {
-        return [{ message: this.message }];
+        return [{ message: i18nInstance.__(this.message) }];
     }
 }

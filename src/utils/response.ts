@@ -1,30 +1,27 @@
 import { i18nInstance } from '../config/translation';
 
-interface IResponse {
+interface ISuccessResponse {
     success: boolean;
     message: string;
     data?: any;
-    error?: any;
 }
 
-const transformResponse = (
-    success: boolean,
+const transformSuccessResponse = (
     messageKey: string,
     data?: any,
-    // error?: Error | unknown,
-): IResponse => {
+): ISuccessResponse => {
     const message = i18nInstance.__(messageKey);
 
-    const response: IResponse = {
-        success,
+    const response: ISuccessResponse = {
+        success: true,
         message,
     };
 
-    if (success && data) {
+    if (data) {
         response.data = data;
     }
 
     return response;
 };
 
-export default transformResponse;
+export default transformSuccessResponse;
