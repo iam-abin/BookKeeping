@@ -3,6 +3,7 @@ export interface InvertoryDto {
 }
 
 export interface AddBookToInvertoryDto extends InvertoryDto {
+    charge: number;
     numberOfCopies: number;
 }
 

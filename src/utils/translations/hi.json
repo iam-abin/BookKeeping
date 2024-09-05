@@ -43,5 +43,13 @@
 	"jwt expired": "jwt expired",
 	"Library is deleted. Cannot add book": "Library is deleted. Cannot add book",
 	"Book removed from inventory successfully": "Book removed from inventory successfully",
-	"Library books are": "Library books are"
+	"Library books are": "Library books are",
+	"Book copies are not available currently": "Book copies are not available currently",
+	"This book does not exist in this library": "This book does not exist in this library",
+	"Book not found In this Library": "Book not found In this Library",
+	"Book borrowed": "Book borrowed",
+	"Book returned": "Book returned",
+	"You already borrowed this book": "You already borrowed this book",
+	"You never borrowed this book": "You never borrowed this book",
+	"You already returned this book": "You already returned this book"
 }

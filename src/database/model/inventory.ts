@@ -4,6 +4,7 @@ export interface IInventory extends Document {
     libraryId: Schema.Types.ObjectId;
     bookId: Schema.Types.ObjectId;
     numberOfCopies: number;
+    charge: number;
     isDeleted: boolean;
 }
 
@@ -22,6 +23,12 @@ const inventorySchema = new Schema<IInventory>(
         numberOfCopies: {
             type: Number,
             default: 1,
+        },
+        charge: {
+            type: Number,
+            required: true,
+            default: 10,
+            min: 10,
         },
         isDeleted: {
             type: Boolean,

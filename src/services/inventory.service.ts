@@ -28,6 +28,7 @@ export class InventoryService {
     public async addBookToInventory(
         libraryId: string,
         bookId: string,
+        charge: number,
         numberOfCopies: number,
     ): Promise<IInventory | null> {
         const book: IBook | null = await bookRepository.findById(bookId);
@@ -57,7 +58,12 @@ export class InventoryService {
             return inventoryBook;
         }
 
-        inventoryBook = await inventoryRepository.addBookToInventory(libraryId, bookId, numberOfCopies);
+        inventoryBook = await inventoryRepository.addBookToInventory(
+            libraryId,
+            bookId,
+            charge,
+            numberOfCopies,
+        );
         return inventoryBook;
     }
 

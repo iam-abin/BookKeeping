@@ -78,9 +78,30 @@ export class LibraryService {
         return deletedLibrary;
     }
 
-    public async borrowBook(borrowBookDto: BorrowBookDto, userId: string): Promise<IBorrow | null> {
+    public async borrowBook(borrowBookDto: BorrowBookDto, borrowerId: string): Promise<IBorrow | null> {
         const { bookId, libraryId } = borrowBookDto;
         // We can also use transaction here for consistency since we are doing 2 update operation in inventory and borrow
+
+        const alreadyBorrowedThisBook: IBorrow | null = await borrowRepository.findBorrowed(
+            libraryId,
+            bookId,
+            borrowerId,
+        );
+
+        // If the book is not returned
+        if (alreadyBorrowedThisBook && !alreadyBorrowedThisBook.isReturned)
+            throw new BadRequestError('You already borrowed this book');
+
+        // If you have once borrowed and returned
+        if (alreadyBorrowedThisBook && alreadyBorrowedThisBook.isReturned) {
+            // Update the return status to false
+            const updatedReturnStatus: IBorrow | null = await borrowRepository.updateReturn(
+                libraryId,
+                bookId,
+                borrowerId,
+            );
+            return updatedReturnStatus;
+        }
 
         // Check if the book exists in the library
         const bookItem: IInventory | null = await inventoryRepository.getInventoryItemByIds(
@@ -93,18 +114,29 @@ export class LibraryService {
         // Check if there are enough copies available
         if (bookItem.numberOfCopies <= 0) throw new BadRequestError('No copies available for borrowing');
 
+        // If going to borrow this book for the first time
+        const borrowedBook: IBorrow | null = await borrowRepository.borrowBook(libraryId, bookId, borrowerId);
+
         // Update the inventory to reduce the number of available copies
         await inventoryRepository.updateInventoryItemCount(libraryId, bookId, INVENTRY_ITEM_DECREMENT_COUNT);
-
-        // Create a new borrow record
-        const borrowedBook: IBorrow | null = await borrowRepository.borrowBook(libraryId, bookId, userId);
 
         return borrowedBook;
     }
 
     public async returnBook(libraryId: string, bookId: string, borrowerId: string): Promise<IBorrow | null> {
+        const alreadyBorrowedThisBook: IBorrow | null = await borrowRepository.findBorrowed(
+            libraryId,
+            bookId,
+            borrowerId,
+        );
+        if (!alreadyBorrowedThisBook) throw new BadRequestError('You never borrowed this book');
+        if (alreadyBorrowedThisBook.isReturned) throw new BadRequestError('You already returned this book');
         // We can also use transaction here for consistency since we are doing 2 update operation in inventory and borrow
-        const bookReturned: IBorrow | null = await borrowRepository.returnBook(libraryId, bookId, borrowerId);
+        const bookReturned: IBorrow | null = await borrowRepository.updateReturn(
+            libraryId,
+            bookId,
+            borrowerId,
+        );
 
         if (!bookReturned) throw new NotFoundError('Your borrow record is not found');
 

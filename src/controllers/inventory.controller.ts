@@ -30,10 +30,11 @@ const getInventoryItemById = async (req: Request, res: Response): Promise<void> 
 
 const addBookToInventory = async (req: Request, res: Response): Promise<void> => {
     const { id: libraryId } = req.params;
-    const { bookId, numberOfCopies } = req.body as AddBookToInvertoryDto;
+    const { bookId, charge, numberOfCopies } = req.body as AddBookToInvertoryDto;
     const item: IInventory | null = await inventoryService.addBookToInventory(
         libraryId,
         bookId,
+        charge,
         numberOfCopies,
     );
 
