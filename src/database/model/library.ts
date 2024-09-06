@@ -5,7 +5,6 @@ export interface ILibrary extends Document {
     address: string;
     contactNumber: string;
     isDeleted: boolean;
-    charge: number;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -23,12 +22,6 @@ const LibrarySchema: Schema = new Schema<ILibrary>(
         contactNumber: {
             type: String,
             required: true,
-        },
-        charge: {
-            type: Number,
-            required: true,
-            default: 10,
-            min: 10,
         },
         isDeleted: {
             type: Boolean,

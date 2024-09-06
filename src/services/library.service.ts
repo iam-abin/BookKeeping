@@ -1,16 +1,22 @@
 import { IBook, IBorrow, IInventory, ILibrary } from '../database/model';
-import { BookRepository, InventoryRepository, LibraryRepository } from '../database/repository';
+import {
+    BookRepository,
+    BorrowRepository,
+    InventoryRepository,
+    LibraryRepository,
+    PaymentRepository,
+} from '../database/repository';
 import { BorrowBookDto } from '../dto/borrow.dto';
 import { CreateLibraryDto, UpdateLibraryDto } from '../dto/library.dto';
 import { BadRequestError, NotFoundError } from '../errors';
 import { INVENTRY_ITEM_DECREMENT_COUNT, INVENTRY_ITEM_INCREMENT_COUNT } from '../utils/constants';
-import { BorrowRepository } from '../database/repository/borrow.repository';
 import { ILibraryDetailsResponse } from '../controllers/library.controller';
 
 const libraryRepository = new LibraryRepository();
 const inventoryRepository = new InventoryRepository();
 const borrowRepository = new BorrowRepository();
 const bookRepository = new BookRepository();
+const paymentRepository = new PaymentRepository();
 
 export class LibraryService {
     public async getAllLibraries(): Promise<ILibrary[] | []> {
@@ -19,9 +25,7 @@ export class LibraryService {
     }
 
     public async getAllDetailsOfLibrary(libraryId: string): Promise<ILibraryDetailsResponse> {
-        const library: ILibrary | null = await libraryRepository.findLibraryById(libraryId);
-        if (!library) throw new NotFoundError('Library not found');
-        if (library.isDeleted) throw new BadRequestError('This is a deleted Library');
+        const library: ILibrary = await this.ensureLibraryExists(libraryId);
 
         // const libraryBooksDetails: IBorrow[] | null = await borrowRepository.findByLibraryId(libraryId);
         const libraryBooksDetails: IInventory[] | [] =
@@ -36,9 +40,8 @@ export class LibraryService {
     ): Promise<{ library: ILibrary; book: IBook | null; borrowersOfBook: IBorrow[] | null }> {
         const book: IBook | null = await bookRepository.findById(bookId);
         if (!book) throw new NotFoundError('Book not found');
-        const library: ILibrary | null = await libraryRepository.findLibraryById(libraryId);
-        if (!library) throw new NotFoundError('Library not found');
-        if (library.isDeleted) throw new BadRequestError('This is a deleted Library');
+
+        const library: ILibrary = await this.ensureLibraryExists(libraryId);
 
         const borrowersOfBook: IBorrow[] | null = await borrowRepository.findByLibraryAndBookId(
             libraryId,
@@ -60,9 +63,8 @@ export class LibraryService {
         libraryId: string,
         updateLibraryDto: Partial<UpdateLibraryDto>,
     ): Promise<ILibrary | null> {
-        const library: ILibrary | null = await libraryRepository.findLibraryById(libraryId);
-        if (!library) throw new NotFoundError('Library not found');
-        if (library.isDeleted) throw new BadRequestError('This is a deleted Library');
+        await this.ensureLibraryExists(libraryId);
+
         const updatedLibrary: ILibrary | null = await libraryRepository.updateLibrary(
             libraryId,
             updateLibraryDto,
@@ -71,51 +73,119 @@ export class LibraryService {
     }
 
     public async deleteLibrary(libraryId: string): Promise<ILibrary | null> {
-        const library: ILibrary | null = await libraryRepository.findLibraryById(libraryId);
-        if (!library) throw new NotFoundError('Library not found');
-        if (library.isDeleted) throw new BadRequestError('Library already deleted');
+        await this.ensureLibraryExists(libraryId);
+
         const deletedLibrary: ILibrary | null = await libraryRepository.deleteLibrary(libraryId);
         return deletedLibrary;
     }
 
-    public async borrowBook(borrowBookDto: BorrowBookDto, userId: string): Promise<IBorrow | null> {
+    public async borrowBook(borrowBookDto: BorrowBookDto, borrowerId: string): Promise<IBorrow | null> {
         const { bookId, libraryId } = borrowBookDto;
         // We can also use transaction here for consistency since we are doing 2 update operation in inventory and borrow
 
-        // Check if the book exists in the library
+        const alreadyBorrowedThisBook: IBorrow | null = await borrowRepository.findBorrowed(
+            libraryId,
+            bookId,
+            borrowerId,
+        );
+
+        // A person can borrow only one book with same bookId from a library
+        // If the book is not returned
+        if (alreadyBorrowedThisBook && !alreadyBorrowedThisBook.isReturned)
+            throw new BadRequestError('You already borrowed this book');
+
+        // Ensure the book exists in the library
         const bookItem: IInventory | null = await inventoryRepository.getInventoryItemByIds(
             libraryId,
             bookId,
         );
         if (!bookItem) throw new NotFoundError('Book not found In this Library');
         if (bookItem.isDeleted) throw new NotFoundError('Book is not available to borrow now');
-
         // Check if there are enough copies available
         if (bookItem.numberOfCopies <= 0) throw new BadRequestError('No copies available for borrowing');
 
-        // Update the inventory to reduce the number of available copies
-        await inventoryRepository.updateInventoryItemCount(libraryId, bookId, INVENTRY_ITEM_DECREMENT_COUNT);
+        // If you had been  once borrowed this book and returned back.
+        if (alreadyBorrowedThisBook && alreadyBorrowedThisBook.isReturned) {
+            // Update the return status to false to buy again
+            const updatedReturnStatus: IBorrow | null = await borrowRepository.updateReturn(
+                libraryId,
+                bookId,
+                borrowerId,
+            );
+            const CHARGE = bookItem?.charge;
+            // await paymentRepository.pay({
+            //     borrowerId,
+            //     borrowId: alreadyBorrowedThisBook._id as string,
+            //     amount: CHARGE,
+            // });
+            await this.handlePayment(alreadyBorrowedThisBook._id as string, borrowerId, CHARGE);
+            // Update the inventory to reduce the number of available copies
+            await this.updateInventoryCount(libraryId, bookId, INVENTRY_ITEM_DECREMENT_COUNT);
 
-        // Create a new borrow record
-        const borrowedBook: IBorrow | null = await borrowRepository.borrowBook(libraryId, bookId, userId);
+            return updatedReturnStatus;
+        }
+
+        // If going to borrow this book for the first time
+        const borrowedBook: IBorrow | null = await borrowRepository.borrowBook(libraryId, bookId, borrowerId);
+
+        if (!borrowedBook) throw new BadRequestError('Borrowing failed');
+
+        // Pay for the book. we can also implement a payment gatway
+        const CHARGE = bookItem.charge;
+        await this.handlePayment(borrowedBook._id as string, borrowerId, CHARGE);
+        // Update the inventory to reduce the number of available copies
+        await this.updateInventoryCount(libraryId, bookId, INVENTRY_ITEM_DECREMENT_COUNT);
 
         return borrowedBook;
     }
 
     public async returnBook(libraryId: string, bookId: string, borrowerId: string): Promise<IBorrow | null> {
+        const alreadyBorrowedThisBook: IBorrow | null = await borrowRepository.findBorrowed(
+            libraryId,
+            bookId,
+            borrowerId,
+        );
+        if (!alreadyBorrowedThisBook) throw new BadRequestError('You never borrowed this book');
+        if (alreadyBorrowedThisBook.isReturned) throw new BadRequestError('You already returned this book');
         // We can also use transaction here for consistency since we are doing 2 update operation in inventory and borrow
-        const bookReturned: IBorrow | null = await borrowRepository.returnBook(libraryId, bookId, borrowerId);
+        const bookReturned: IBorrow | null = await borrowRepository.updateReturn(
+            libraryId,
+            bookId,
+            borrowerId,
+        );
 
         if (!bookReturned) throw new NotFoundError('Your borrow record is not found');
 
-        const updatedInventory: IInventory | null = await inventoryRepository.updateInventoryItemCount(
+        // Increment inventry item count
+        await this.updateInventoryCount(libraryId, bookId, INVENTRY_ITEM_INCREMENT_COUNT);
+        return bookReturned;
+    }
+
+    // Helper functions for some common functionalities
+    private async ensureLibraryExists(libraryId: string): Promise<ILibrary> {
+        const library = await libraryRepository.findLibraryById(libraryId);
+        if (!library) throw new NotFoundError('Library not found');
+        if (library.isDeleted) throw new BadRequestError('This is a deleted Library');
+        return library;
+    }
+
+    private async handlePayment(borrowId: string, borrowerId: string, amount: number): Promise<void> {
+        const payment = await paymentRepository.pay({ borrowerId, borrowId, amount });
+        if (!payment) throw new Error('payment failed');
+        // return payment
+    }
+
+    private async updateInventoryCount(
+        libraryId: string,
+        bookId: string,
+        updateCount: number,
+    ): Promise<IInventory | null> {
+        const countUpdate = await inventoryRepository.updateInventoryItemCount(
             libraryId,
             bookId,
-            INVENTRY_ITEM_INCREMENT_COUNT,
+            updateCount,
         );
-
-        if (!updatedInventory) throw new NotFoundError('Inventory item not found');
-
-        return bookReturned;
+        if (!countUpdate) throw new Error('Item count update failed');
+        return countUpdate;
     }
 }

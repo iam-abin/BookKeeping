@@ -4,7 +4,7 @@ import path from 'path';
 // Configure i18n
 const i18nConfig = {
     locales: ['en', 'hi'],
-    defaultLocale: 'hi',
+    defaultLocale: 'en',
     directory: path.join(__dirname, '../utils', 'translations'), // Custom directory path
 };
 

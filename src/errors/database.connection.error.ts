@@ -1,4 +1,4 @@
-import { i18nInstance } from '../config/translation';
+import { convertMessage } from '../utils';
 import { CustomError } from './custom.error';
 
 export class DatabaseConnectionError extends CustomError {
@@ -8,6 +8,6 @@ export class DatabaseConnectionError extends CustomError {
         Object.setPrototypeOf(this, DatabaseConnectionError.prototype);
     }
     serializeErrors() {
-        return [{ message: i18nInstance.__(this.message) }];
+        return [{ message: convertMessage(this.message) }];
     }
 }

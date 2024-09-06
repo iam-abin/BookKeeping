@@ -2,7 +2,7 @@ import { IUser } from '../database/model';
 import { UserRepository } from '../database/repository';
 import { UserRegisterDto, UserSignInDto } from '../dto/user.dto';
 import { BadRequestError } from '../errors';
-import { comparePassword } from '../utils';
+import { comparePassword, createJwtAccessToken } from '../utils';
 
 const userRepository = new UserRepository();
 
@@ -17,7 +17,7 @@ export class AuthService {
         return createdUser;
     }
 
-    public async signIn(userSignInDto: UserSignInDto): Promise<IUser> {
+    public async signIn(userSignInDto: UserSignInDto): Promise<{ user: IUser; accessToken: string }> {
         const { email, password } = userSignInDto;
 
         const existingUser: IUser | null = await userRepository.findByEmail(email);
@@ -25,6 +25,14 @@ export class AuthService {
         const isSamePassword: boolean = await comparePassword(password, existingUser.password);
         if (!isSamePassword) throw new BadRequestError('Invalid email or password');
 
-        return existingUser;
+        const userPayload = {
+            userId: existingUser._id as string,
+            name: existingUser.name,
+            email: existingUser.email,
+            role: existingUser.role,
+        };
+        const jwt: string = createJwtAccessToken(userPayload);
+
+        return { user: existingUser, accessToken: jwt };
     }
 }

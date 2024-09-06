@@ -21,13 +21,13 @@ Make sure you have the following installed on your system:
 1. Clone the repository:
 
 ```
-git clone https://github.com/iam-abin/kalpas.git
+git clone https://github.com/iam-abin/BookKeeping.git
 ```
 
 2. Navigate to the project directory:
 
 ```
-cd kalpas
+cd BookKeeping
 ```
 
 3. Install the dependencies:

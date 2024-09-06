@@ -2,14 +2,19 @@ import { BorrowModel, IBorrow } from '../model';
 
 export class BorrowRepository {
     async borrowBook(libraryId: string, bookId: string, userId: string): Promise<IBorrow | null> {
-        const borrowedBook = await BorrowModel.create({ libraryId, bookId, borrowerId: userId });
+        const borrowedBook = await BorrowModel.create({
+            libraryId,
+            bookId,
+            borrowerId: userId,
+            isReturned: false,
+        });
         return borrowedBook;
     }
 
-    async returnBook(libraryId: string, bookId: string, borrowerId: string): Promise<IBorrow | null> {
+    async updateReturn(libraryId: string, bookId: string, borrowerId: string): Promise<IBorrow | null> {
         const returned: IBorrow | null = await BorrowModel.findOneAndUpdate(
             { libraryId, bookId, borrowerId },
-            { isReturned: true },
+            [{ $set: { isReturned: { $not: '$isReturned' } } }],
             {
                 new: true,
             },
@@ -24,6 +29,11 @@ export class BorrowRepository {
 
     async findByLibraryAndBookId(libraryId: string, bookId: string): Promise<IBorrow[] | null> {
         const bookBorrowDetails = await BorrowModel.find({ libraryId, bookId }).populate('borrowerId');
+        return bookBorrowDetails;
+    }
+
+    async findBorrowed(libraryId: string, bookId: string, borrowerId: string): Promise<IBorrow | null> {
+        const bookBorrowDetails = await BorrowModel.findOne({ libraryId, bookId, borrowerId });
         return bookBorrowDetails;
     }
 }

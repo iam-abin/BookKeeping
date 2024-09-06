@@ -1,23 +1,17 @@
-import { i18nInstance } from '../config/translation';
+import { convertMessage } from './transformMessage';
 
-interface ISuccessResponse {
+interface ISuccessResponse<T> {
     success: boolean;
     message: string;
-    data?: any;
+    data?: T;
 }
 
-const transformSuccessResponse = (messageKey: string, data?: any): ISuccessResponse => {
-    const message = i18nInstance.__(messageKey);
+const transformSuccessResponse = <T>(messageKey: string, data?: T): ISuccessResponse<T> => {
+    const message = convertMessage(messageKey);
 
-    const response: ISuccessResponse = {
-        success: true,
-        message,
-    };
+    const response: ISuccessResponse<T> = { success: true, message };
 
-    if (data) {
-        response.data = data;
-    }
-
+    if (data) response.data = data;
     return response;
 };
 

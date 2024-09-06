@@ -21,9 +21,15 @@ export class InventoryRepository {
     async addBookToInventory(
         libraryId: string,
         bookId: string,
+        charge: number,
         numberOfCopies: number,
     ): Promise<IInventory | null> {
-        const book: IInventory | null = await InventoryModel.create({ libraryId, bookId, numberOfCopies });
+        const book: IInventory | null = await InventoryModel.create({
+            libraryId,
+            bookId,
+            charge,
+            numberOfCopies,
+        });
         return book;
     }
 

@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { CustomError } from '../errors';
-import { winstonLogError } from '../utils';
-import { i18nInstance } from '../config/translation';
+import { convertMessage, winstonLogError } from '../utils';
 
 export const errorHandler = (err: Error, req: Request, res: Response, next: NextFunction) => {
     const isProduction = process.env.NODE_ENV === 'production';
@@ -19,8 +18,8 @@ export const errorHandler = (err: Error, req: Request, res: Response, next: Next
         errors: [
             {
                 message: isProduction
-                    ? i18nInstance.__('Something went wrong!!!')
-                    : i18nInstance.__(err.message || 'Internal server error'),
+                    ? convertMessage('Something went wrong!!!')
+                    : convertMessage(err.message || 'Internal server error'),
             },
         ],
     });
