@@ -1,6 +1,6 @@
 import { ValidationError } from 'express-validator';
 import { CustomError } from './custom.error';
-import { i18nInstance } from '../config/translation';
+import { convertMessage } from '../utils';
 
 export class RequestValidationError extends CustomError {
     statusCode = 400;
@@ -13,9 +13,9 @@ export class RequestValidationError extends CustomError {
     serializeErrors() {
         return this.errors.map((err) => {
             if (err.type === 'field') {
-                return { message: i18nInstance.__(err.msg), field: err.path };
+                return { message: convertMessage(err.msg), field: err.path };
             }
-            return { message: i18nInstance.__(err.msg) };
+            return { message: convertMessage(err.msg) };
         });
     }
 }

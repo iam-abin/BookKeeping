@@ -1,4 +1,4 @@
-import { i18nInstance } from '../config/translation';
+import { convertMessage } from '../utils';
 import { CustomError } from './custom.error';
 
 export class NotFoundError extends CustomError {
@@ -9,6 +9,6 @@ export class NotFoundError extends CustomError {
         Object.setPrototypeOf(this, NotFoundError.prototype);
     }
     serializeErrors() {
-        return [{ message: i18nInstance.__(this.message) }];
+        return [{ message: convertMessage(this.message) }];
     }
 }

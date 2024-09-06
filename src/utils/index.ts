@@ -3,6 +3,7 @@ export * from './fileUpload';
 export * from './jwt';
 export * from './password';
 export * from './roles';
+export * from './transformMessage';
 export * from './validation/book.validation';
 export * from './validation/inventory.validation';
 export * from './validation/library.validation';

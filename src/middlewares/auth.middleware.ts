@@ -29,11 +29,11 @@ export const auth = (requiredRole: UserRole) => {
             if (decoded.role !== requiredRole)
                 throw new ForbiddenError('You have no permission to access this route');
             req.user = decoded;
-            console.log('req.user', req.user);
+            // console.log('req.user', req.user);
 
             next();
         } catch (error) {
-            console.log(error);
+            // console.log(error);
             next(error);
         }
     };

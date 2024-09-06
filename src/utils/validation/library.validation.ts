@@ -1,4 +1,5 @@
 import { body } from 'express-validator';
+import { validateRequest } from '../../middlewares';
 
 export const createLibraryRequestBodyValidator = [
     body('libraryName').notEmpty().withMessage('Library name is required').trim().escape(),
@@ -12,6 +13,7 @@ export const createLibraryRequestBodyValidator = [
         .withMessage('Library contact number must be numeric')
         .trim()
         .escape(),
+    validateRequest,
 ];
 
 export const updateLibraryRequestBodyValidator = [
@@ -27,4 +29,5 @@ export const updateLibraryRequestBodyValidator = [
         .withMessage('Library contact number must be numeric')
         .trim()
         .escape(),
+    validateRequest,
 ];

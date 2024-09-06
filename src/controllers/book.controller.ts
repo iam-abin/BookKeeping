@@ -20,7 +20,6 @@ const getABook = async (req: Request, res: Response): Promise<void> => {
 
 const createBook = async (req: Request, res: Response): Promise<void> => {
     const { userId } = req.user!;
-    console.log('req.body ', req.body);
     const book: IBook | null = await bookService.createBook(req.body as CreateBookDto, userId, req.file!);
     res.status(201).json(transformSuccessResponse('Book created successfully', { book }));
 };

@@ -28,8 +28,6 @@ export class BookRepository {
     }
 
     async updateBook(bookId: string, bookUpdateData?: Partial<UpdateBookDto>): Promise<IBook | null> {
-        console.log(bookUpdateData);
-
         const updatedBook = await BookModel.findByIdAndUpdate(bookId, { ...bookUpdateData }, { new: true });
         return updatedBook;
     }

@@ -1,4 +1,4 @@
-import { i18nInstance } from '../config/translation';
+import { convertMessage } from '../utils';
 import { CustomError } from './custom.error';
 
 export class NotAuthorizedError extends CustomError {
@@ -10,6 +10,6 @@ export class NotAuthorizedError extends CustomError {
     }
 
     serializeErrors() {
-        return [{ message: i18nInstance.__(this.message) }];
+        return [{ message: convertMessage(this.message) }];
     }
 }
