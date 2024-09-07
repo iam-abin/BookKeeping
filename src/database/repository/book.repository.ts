@@ -1,3 +1,4 @@
+import { ClientSession } from 'mongoose';
 import { CreateBookDto, UpdateBookDto } from '../../dto/book.dto';
 import { BookModel, IBook } from '../model';
 
@@ -17,9 +18,9 @@ export class BookRepository {
         return book;
     }
 
-    async createBook(bookData: CreateBookDto): Promise<IBook> {
-        const book = await BookModel.create(bookData);
-        return book;
+    async createBook(bookData: CreateBookDto, session?: ClientSession): Promise<IBook> {
+        const book = await BookModel.create([{ ...bookData }], { session });
+        return book[0];
     }
 
     async findByTitle(title: string): Promise<IBook | null> {

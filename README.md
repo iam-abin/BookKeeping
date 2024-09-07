@@ -3,7 +3,7 @@ Kalpas
 - Author, borrower,  admin are the users. admin is like library manager.
 - Admin role is working like admin can create libraries and he can manage it.
 
-- express-async-error library is used here to catch errors of async functions.
+- express-async-errors library is used here to catch errors of async functions.
 
 # Library Management system
 

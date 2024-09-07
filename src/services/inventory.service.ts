@@ -12,7 +12,7 @@ export class InventoryService {
         const library: ILibrary | null = await libraryRepository.findLibraryById(libraryId);
         if (!library) throw new NotFoundError('Library not found');
         if (library.isDeleted) throw new BadRequestError('Library already deleted');
-        const inventories: IInventory[] | [] = await inventoryRepository.getInventoryByLibraryId(libraryId);
+        const inventories: IInventory[] | [] = await inventoryRepository.findInventoryByLibraryId(libraryId);
         return inventories;
     }
 
@@ -20,7 +20,7 @@ export class InventoryService {
         const library: ILibrary | null = await libraryRepository.findLibraryById(libraryId);
         if (!library) throw new NotFoundError('Library not found');
         if (library.isDeleted) throw new BadRequestError('Library already deleted');
-        const book: IInventory | null = await inventoryRepository.getInventoryItemByIds(libraryId, bookId);
+        const book: IInventory | null = await inventoryRepository.findInventoryItemByIds(libraryId, bookId);
         if (!book) throw new NotFoundError('No such book in this library');
         return book;
     }
@@ -42,7 +42,7 @@ export class InventoryService {
         if (!library) throw new NotFoundError('Library not found');
         if (library.isDeleted) throw new BadRequestError('Library is deleted. Cannot add book');
 
-        const isBookInInventory: IInventory | null = await inventoryRepository.getInventoryItemByIds(
+        const isBookInInventory: IInventory | null = await inventoryRepository.findInventoryItemByIds(
             libraryId,
             bookId,
         );
@@ -74,7 +74,7 @@ export class InventoryService {
         if (!library) throw new NotFoundError('Library not found');
         if (library.isDeleted) throw new BadRequestError('Library is deleted. Cannot access inventory item');
 
-        const book: IInventory | null = await inventoryRepository.getInventoryItemByIds(libraryId, bookId);
+        const book: IInventory | null = await inventoryRepository.findInventoryItemByIds(libraryId, bookId);
         // To check book is available in the library
         if (!book) throw new NotFoundError('This book does not exist in this library');
         // Here the book is deleted means It is not available to borrow.
