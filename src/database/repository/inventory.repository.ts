@@ -1,14 +1,15 @@
+import { ClientSession } from 'mongoose';
 import { InventoryModel, IInventory } from '../model';
 
 export class InventoryRepository {
-    async getInventoryByLibraryId(libraryId: string): Promise<IInventory[]> {
+    async findInventoryByLibraryId(libraryId: string): Promise<IInventory[]> {
         const books: IInventory[] | [] = await InventoryModel.find({ libraryId })
             .populate('libraryId')
             .populate('bookId');
         return books;
     }
 
-    async getInventoryItemByIds(libraryId: string, bookId: string): Promise<IInventory | null> {
+    async findInventoryItemByIds(libraryId: string, bookId: string): Promise<IInventory | null> {
         const book: IInventory | null = await InventoryModel.findOne({
             libraryId,
             bookId,
@@ -38,11 +39,12 @@ export class InventoryRepository {
         libraryId: string,
         bookId: string,
         updateCount: number,
+        session?: ClientSession,
     ): Promise<IInventory | null> {
         const inventoryItem: IInventory | null = await InventoryModel.findOneAndUpdate(
             { libraryId, bookId },
             { $set: { isDeleted: false }, $inc: { numberOfCopies: updateCount } },
-            { new: true },
+            { new: true, session },
         ).exec(); // Use exec() to return a proper promise;
 
         return inventoryItem;

@@ -28,6 +28,7 @@ app.use(
     }),
 );
 app.use(rateLimiter);
+// To set up language
 app.use(i18nInstance.init);
 
 // Http logger middlewares

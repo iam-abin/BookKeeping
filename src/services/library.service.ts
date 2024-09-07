@@ -11,6 +11,7 @@ import { CreateLibraryDto, UpdateLibraryDto } from '../dto/library.dto';
 import { BadRequestError, NotFoundError } from '../errors';
 import { INVENTRY_ITEM_DECREMENT_COUNT, INVENTRY_ITEM_INCREMENT_COUNT } from '../utils/constants';
 import { ILibraryDetailsResponse } from '../controllers/library.controller';
+import mongoose, { ClientSession } from 'mongoose';
 
 const libraryRepository = new LibraryRepository();
 const inventoryRepository = new InventoryRepository();
@@ -29,7 +30,7 @@ export class LibraryService {
 
         // const libraryBooksDetails: IBorrow[] | null = await borrowRepository.findByLibraryId(libraryId);
         const libraryBooksDetails: IInventory[] | [] =
-            await inventoryRepository.getInventoryByLibraryId(libraryId);
+            await inventoryRepository.findInventoryByLibraryId(libraryId);
 
         return { library, libraryBooksDetails };
     }
@@ -81,84 +82,118 @@ export class LibraryService {
 
     public async borrowBook(borrowBookDto: BorrowBookDto, borrowerId: string): Promise<IBorrow | null> {
         const { bookId, libraryId } = borrowBookDto;
-        // We can also use transaction here for consistency since we are doing 2 update operation in inventory and borrow
 
-        const alreadyBorrowedThisBook: IBorrow | null = await borrowRepository.findBorrowed(
-            libraryId,
-            bookId,
-            borrowerId,
-        );
-
-        // A person can borrow only one book with same bookId from a library
-        // If the book is not returned
-        if (alreadyBorrowedThisBook && !alreadyBorrowedThisBook.isReturned)
-            throw new BadRequestError('You already borrowed this book');
-
-        // Ensure the book exists in the library
-        const bookItem: IInventory | null = await inventoryRepository.getInventoryItemByIds(
-            libraryId,
-            bookId,
-        );
-        if (!bookItem) throw new NotFoundError('Book not found In this Library');
-        if (bookItem.isDeleted) throw new NotFoundError('Book is not available to borrow now');
-        // Check if there are enough copies available
-        if (bookItem.numberOfCopies <= 0) throw new BadRequestError('No copies available for borrowing');
-
-        // If you had been  once borrowed this book and returned back.
-        if (alreadyBorrowedThisBook && alreadyBorrowedThisBook.isReturned) {
-            // Update the return status to false to buy again
-            const updatedReturnStatus: IBorrow | null = await borrowRepository.updateReturn(
+        // Start a session
+        const session = await mongoose.startSession();
+        session.startTransaction();
+        try {
+            const alreadyBorrowedThisBook: IBorrow | null = await borrowRepository.findBorrowed(
                 libraryId,
                 bookId,
                 borrowerId,
             );
-            const CHARGE = bookItem?.charge;
-            // await paymentRepository.pay({
-            //     borrowerId,
-            //     borrowId: alreadyBorrowedThisBook._id as string,
-            //     amount: CHARGE,
-            // });
-            await this.handlePayment(alreadyBorrowedThisBook._id as string, borrowerId, CHARGE);
+
+            // A person can borrow only one book with same bookId from a library
+            // If the book is not returned
+            if (alreadyBorrowedThisBook && !alreadyBorrowedThisBook.isReturned)
+                throw new BadRequestError('You already borrowed this book');
+
+            // Ensure the book exists in the library
+            const bookItem: IInventory | null = await inventoryRepository.findInventoryItemByIds(
+                libraryId,
+                bookId,
+            );
+            if (!bookItem) throw new NotFoundError('Book not found In this Library');
+            if (bookItem.isDeleted) throw new NotFoundError('Book is not available to borrow now');
+            // Check if there are enough copies available
+            if (bookItem.numberOfCopies <= 0) throw new BadRequestError('No copies available for borrowing');
+
+            // If you had been  once borrowed this book and returned back.
+            if (alreadyBorrowedThisBook && alreadyBorrowedThisBook.isReturned) {
+                // Update the return status to false to buy again
+                const updatedReturnStatus: IBorrow | null = await borrowRepository.updateReturn(
+                    libraryId,
+                    bookId,
+                    borrowerId,
+                    session,
+                );
+                const CHARGE = bookItem?.charge;
+
+                await this.handlePayment(alreadyBorrowedThisBook._id as string, borrowerId, CHARGE, session);
+                // Update the inventory to reduce the number of available copies
+                await this.updateInventoryCount(libraryId, bookId, INVENTRY_ITEM_DECREMENT_COUNT, session);
+
+                // Commit the transaction
+                await session.commitTransaction();
+                return updatedReturnStatus;
+            }
+
+            // If going to borrow this book for the first time
+            const borrowedBook: IBorrow | null = await borrowRepository.borrowBook(
+                libraryId,
+                bookId,
+                borrowerId,
+                session,
+            );
+
+            if (!borrowedBook) throw new BadRequestError('Borrowing failed');
+
+            // Pay for the book. we can also implement a payment gatway
+            const CHARGE = bookItem.charge;
+            await this.handlePayment(borrowedBook._id as string, borrowerId, CHARGE, session);
+
             // Update the inventory to reduce the number of available copies
-            await this.updateInventoryCount(libraryId, bookId, INVENTRY_ITEM_DECREMENT_COUNT);
+            await this.updateInventoryCount(libraryId, bookId, INVENTRY_ITEM_DECREMENT_COUNT, session);
 
-            return updatedReturnStatus;
+            // Commit the transaction
+            await session.commitTransaction();
+            return borrowedBook;
+        } catch (error) {
+            // Rollback the transaction if something goes wrong
+            await session.abortTransaction();
+            throw error;
+        } finally {
+            session.endSession();
         }
-
-        // If going to borrow this book for the first time
-        const borrowedBook: IBorrow | null = await borrowRepository.borrowBook(libraryId, bookId, borrowerId);
-
-        if (!borrowedBook) throw new BadRequestError('Borrowing failed');
-
-        // Pay for the book. we can also implement a payment gatway
-        const CHARGE = bookItem.charge;
-        await this.handlePayment(borrowedBook._id as string, borrowerId, CHARGE);
-        // Update the inventory to reduce the number of available copies
-        await this.updateInventoryCount(libraryId, bookId, INVENTRY_ITEM_DECREMENT_COUNT);
-
-        return borrowedBook;
     }
 
     public async returnBook(libraryId: string, bookId: string, borrowerId: string): Promise<IBorrow | null> {
-        const alreadyBorrowedThisBook: IBorrow | null = await borrowRepository.findBorrowed(
-            libraryId,
-            bookId,
-            borrowerId,
-        );
-        if (!alreadyBorrowedThisBook) throw new BadRequestError('You never borrowed this book');
-        if (alreadyBorrowedThisBook.isReturned) throw new BadRequestError('You already returned this book');
-        // We can also use transaction here for consistency since we are doing 2 update operation in inventory and borrow
-        const bookReturned: IBorrow | null = await borrowRepository.updateReturn(
-            libraryId,
-            bookId,
-            borrowerId,
-        );
+        // Start a session
+        const session = await mongoose.startSession();
+        session.startTransaction();
 
-        if (!bookReturned) throw new NotFoundError('Your borrow record is not found');
+        try {
+            const alreadyBorrowedThisBook: IBorrow | null = await borrowRepository.findBorrowed(
+                libraryId,
+                bookId,
+                borrowerId,
+            );
+            if (!alreadyBorrowedThisBook) throw new BadRequestError('You never borrowed this book');
+            if (alreadyBorrowedThisBook.isReturned)
+                throw new BadRequestError('You already returned this book');
+            // We can also use transaction here for consistency since we are doing 2 update operation in inventory and borrow
+            const bookReturned: IBorrow | null = await borrowRepository.updateReturn(
+                libraryId,
+                bookId,
+                borrowerId,
+                session,
+            );
 
-        // Increment inventry item count
-        await this.updateInventoryCount(libraryId, bookId, INVENTRY_ITEM_INCREMENT_COUNT);
-        return bookReturned;
+            if (!bookReturned) throw new NotFoundError('Your borrow record is not found');
+
+            // Increment inventry item count
+            await this.updateInventoryCount(libraryId, bookId, INVENTRY_ITEM_INCREMENT_COUNT, session);
+
+            // Commit the transaction
+            await session.commitTransaction();
+            return bookReturned;
+        } catch (error) {
+            // Rollback the transaction if something goes wrong
+            await session.abortTransaction();
+            throw error;
+        } finally {
+            session.endSession();
+        }
     }
 
     // Helper functions for some common functionalities
@@ -169,8 +204,13 @@ export class LibraryService {
         return library;
     }
 
-    private async handlePayment(borrowId: string, borrowerId: string, amount: number): Promise<void> {
-        const payment = await paymentRepository.pay({ borrowerId, borrowId, amount });
+    private async handlePayment(
+        borrowId: string,
+        borrowerId: string,
+        amount: number,
+        session?: ClientSession,
+    ): Promise<void> {
+        const payment = await paymentRepository.createPayment({ borrowerId, borrowId, amount }, session);
         if (!payment) throw new Error('payment failed');
         // return payment
     }
@@ -179,11 +219,13 @@ export class LibraryService {
         libraryId: string,
         bookId: string,
         updateCount: number,
+        session?: ClientSession,
     ): Promise<IInventory | null> {
         const countUpdate = await inventoryRepository.updateInventoryItemCount(
             libraryId,
             bookId,
             updateCount,
+            session,
         );
         if (!countUpdate) throw new Error('Item count update failed');
         return countUpdate;
