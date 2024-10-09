@@ -1,8 +1,8 @@
-import { CreateLibraryDto, UpdateLibraryDto } from '../../dto/library.dto';
+import { LibraryDto } from '../../dto/library.dto';
 import { LibraryModel, ILibrary } from '../model';
 
-export class LibraryRepository {
-    async createLibrary(libraryData: CreateLibraryDto): Promise<ILibrary> {
+class LibraryRepository {
+    async createLibrary(libraryData: LibraryDto): Promise<ILibrary> {
         return await LibraryModel.create(libraryData);
     }
 
@@ -20,7 +20,7 @@ export class LibraryRepository {
 
     async updateLibrary(
         libraryId: string,
-        libraryUpdateData?: Partial<UpdateLibraryDto>,
+        libraryUpdateData?: Partial<LibraryDto>,
     ): Promise<ILibrary | null> {
         const updatedLibrary = await LibraryModel.findByIdAndUpdate(libraryId, libraryUpdateData, {
             new: true,
@@ -38,3 +38,5 @@ export class LibraryRepository {
         return deletedlibrary;
     }
 }
+
+export const libraryRepository = new LibraryRepository();

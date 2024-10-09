@@ -1,7 +1,7 @@
 import { UserRegisterDto } from '../../dto/user.dto';
 import { IUser, UserModel } from '../model';
 
-export class UserRepository {
+class UserRepository {
     async createUser(userData: UserRegisterDto): Promise<IUser> {
         const newUser = await UserModel.create(userData);
         return newUser;
@@ -12,3 +12,5 @@ export class UserRepository {
         return user;
     }
 }
+
+export const userRepository = new UserRepository();

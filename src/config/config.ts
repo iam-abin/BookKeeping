@@ -13,7 +13,7 @@ interface IConfig {
     FIREBASE_APP_ID: string;
 }
 
-const config: IConfig = Object.freeze({
+const config: Readonly<IConfig> = {
     PORT: process.env.PORT || 4000,
     MONGO_URI: process.env.MONGODB_CONNECTION_STRING as string,
     API_BASE_PATH: '/api',
@@ -26,6 +26,6 @@ const config: IConfig = Object.freeze({
     FIREBASE_STORAGE_BUCKET: `${process.env.FIREBASE_PROJECT_ID}.appspot.com`,
     FIREBASE_MESSAGING_SENDER_ID: process.env.FIREBASE_MESSAGING_SENDER_ID as string,
     FIREBASE_APP_ID: process.env.FIREBASE_APP_ID as string,
-});
+};
 
 export { config };

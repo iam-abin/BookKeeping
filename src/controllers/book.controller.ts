@@ -1,14 +1,11 @@
 import { Request, Response } from 'express';
-import { BookService } from '../services';
+import { bookService } from '../services';
 import { IBook } from '../database/model';
-import { CreateBookDto, UpdateBookDto } from '../dto/book.dto';
+import { BookDto } from '../dto/book.dto';
 import transformSuccessResponse from '../utils/response';
-
-const bookService = new BookService();
 
 const getAllBooks = async (req: Request, res: Response): Promise<void> => {
     const books: IBook[] | [] = await bookService.getAllBooks();
-
     res.status(200).json(transformSuccessResponse('All the Books are', { books }));
 };
 
@@ -20,7 +17,7 @@ const getABook = async (req: Request, res: Response): Promise<void> => {
 
 const createBook = async (req: Request, res: Response): Promise<void> => {
     const { userId } = req.user!;
-    const book: IBook | null = await bookService.createBook(req.body as CreateBookDto, userId, req.file!);
+    const book: IBook | null = await bookService.createBook(req.body as BookDto, userId, req.file!);
     res.status(201).json(transformSuccessResponse('Book created successfully', { book }));
 };
 
@@ -30,7 +27,7 @@ const updateBook = async (req: Request, res: Response): Promise<void> => {
     const book: IBook | null = await bookService.updateBook(
         id,
         userId,
-        req.body as Partial<UpdateBookDto>,
+        req.body as Partial<BookDto>,
         req.file!,
     );
     res.status(200).json(transformSuccessResponse('Book updated successfully', { book }));

@@ -40,7 +40,7 @@ app.use(`${config.API_BASE_PATH}/users`, userRoutes);
 app.use(`${config.API_BASE_PATH}/books`, bookRoutes);
 app.use(`${config.API_BASE_PATH}/libraries`, libraryRoutes);
 
-app.all('*', (req: Request, res: Response) => {
+app.all('*', (req: Request, res: Response): never => {
     throw new NotFoundError();
 });
 

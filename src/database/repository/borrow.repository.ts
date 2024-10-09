@@ -1,7 +1,7 @@
 import { ClientSession } from 'mongoose';
 import { BorrowModel, IBorrow } from '../model';
 
-export class BorrowRepository {
+class BorrowRepository {
     async borrowBook(
         libraryId: string,
         bookId: string,
@@ -56,3 +56,5 @@ export class BorrowRepository {
         return bookBorrowDetails;
     }
 }
+
+export const borrowRepository = new BorrowRepository();

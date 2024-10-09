@@ -4,7 +4,7 @@ import { ForbiddenError, NotAuthorizedError } from '../errors';
 import { config } from '../config/config';
 import { UserRole } from '../utils/roles';
 
-export interface IPayload {
+export interface IJwtPayload {
     userId: string;
     name: string;
     email: string;
@@ -14,7 +14,7 @@ export interface IPayload {
 declare global {
     namespace Express {
         interface Request {
-            user?: IPayload;
+            user?: IJwtPayload;
         }
     }
 }
@@ -24,7 +24,7 @@ export const auth = (requiredRole: UserRole) => {
         try {
             const token = req.header('Authorization')?.replace('Bearer ', '');
             if (!token) throw new NotAuthorizedError('UnAuthorized Request');
-            const decoded = jwt.verify(token, config.JWT_SECRET!) as IPayload;
+            const decoded = jwt.verify(token, config.JWT_SECRET!) as IJwtPayload;
 
             if (decoded.role !== requiredRole)
                 throw new ForbiddenError('You have no permission to access this route');

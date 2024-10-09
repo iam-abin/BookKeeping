@@ -1,10 +1,8 @@
 import { Request, Response } from 'express';
-import { AuthService } from '../services';
+import { authService } from '../services';
 import { UserRegisterDto, UserSignInDto } from '../dto/user.dto';
 import { IUser } from '../database/model';
 import transformSuccessResponse from '../utils/response';
-
-const authService = new AuthService();
 
 const signup = async (req: Request, res: Response): Promise<void> => {
     const user: IUser = await authService.signUp(req.body as UserRegisterDto);

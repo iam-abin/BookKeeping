@@ -1,8 +1,8 @@
 import { ClientSession } from 'mongoose';
-import { CreateBookDto, UpdateBookDto } from '../../dto/book.dto';
+import { BookDto } from '../../dto/book.dto';
 import { BookModel, IBook } from '../model';
 
-export class BookRepository {
+class BookRepository {
     async findAllBooks(): Promise<IBook[] | []> {
         const books = await BookModel.find().populate('authorId');
         return books;
@@ -18,7 +18,7 @@ export class BookRepository {
         return book;
     }
 
-    async createBook(bookData: CreateBookDto, session?: ClientSession): Promise<IBook> {
+    async createBook(bookData: BookDto, session?: ClientSession): Promise<IBook> {
         const book = await BookModel.create([{ ...bookData }], { session });
         return book[0];
     }
@@ -28,7 +28,7 @@ export class BookRepository {
         return book;
     }
 
-    async updateBook(bookId: string, bookUpdateData?: Partial<UpdateBookDto>): Promise<IBook | null> {
+    async updateBook(bookId: string, bookUpdateData?: Partial<BookDto>): Promise<IBook | null> {
         const updatedBook = await BookModel.findByIdAndUpdate(bookId, { ...bookUpdateData }, { new: true });
         return updatedBook;
     }
@@ -39,3 +39,5 @@ export class BookRepository {
         return deletedBook;
     }
 }
+
+export const bookRepository = new BookRepository();

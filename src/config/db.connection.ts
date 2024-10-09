@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 import { DatabaseConnectionError } from '../errors';
 import { config } from './config';
 
-const connectDB = async () => {
+const connectDB = async (): Promise<void> => {
     try {
         await mongoose.connect(config.MONGO_URI);
         console.log('connected to mongodb...🛢');

@@ -3,6 +3,3 @@ export interface LibraryDto {
     address: string;
     contactNumber: string;
 }
-
-export type CreateLibraryDto = LibraryDto;
-export type UpdateLibraryDto = Partial<LibraryDto>;

@@ -1,25 +1,19 @@
 import { IBook, IBorrow, IInventory, ILibrary } from '../database/model';
 import {
-    BookRepository,
-    BorrowRepository,
-    InventoryRepository,
-    LibraryRepository,
-    PaymentRepository,
+    bookRepository,
+    borrowRepository,
+    inventoryRepository,
+    libraryRepository,
+    paymentRepository,
 } from '../database/repository';
 import { BorrowBookDto } from '../dto/borrow.dto';
-import { CreateLibraryDto, UpdateLibraryDto } from '../dto/library.dto';
+import { LibraryDto } from '../dto/library.dto';
 import { BadRequestError, NotFoundError } from '../errors';
 import { INVENTRY_ITEM_DECREMENT_COUNT, INVENTRY_ITEM_INCREMENT_COUNT } from '../utils/constants';
 import { ILibraryDetailsResponse } from '../controllers/library.controller';
 import mongoose, { ClientSession } from 'mongoose';
 
-const libraryRepository = new LibraryRepository();
-const inventoryRepository = new InventoryRepository();
-const borrowRepository = new BorrowRepository();
-const bookRepository = new BookRepository();
-const paymentRepository = new PaymentRepository();
-
-export class LibraryService {
+class LibraryService {
     public async getAllLibraries(): Promise<ILibrary[] | []> {
         const libraries: ILibrary[] | [] = await libraryRepository.findAllLibraries();
         return libraries;
@@ -52,7 +46,7 @@ export class LibraryService {
         return { library, book, borrowersOfBook };
     }
 
-    public async createLibrary(createLibraryDto: CreateLibraryDto): Promise<ILibrary> {
+    public async createLibrary(createLibraryDto: LibraryDto): Promise<ILibrary> {
         const { libraryName } = createLibraryDto;
         const library: ILibrary | null = await libraryRepository.findLibraryByName(libraryName);
         if (library) throw new BadRequestError('Library already exist!');
@@ -62,7 +56,7 @@ export class LibraryService {
 
     public async updateLibrary(
         libraryId: string,
-        updateLibraryDto: Partial<UpdateLibraryDto>,
+        updateLibraryDto: Partial<LibraryDto>,
     ): Promise<ILibrary | null> {
         await this.ensureLibraryExists(libraryId);
 
@@ -231,3 +225,5 @@ export class LibraryService {
         return countUpdate;
     }
 }
+
+export const libraryService = new LibraryService();

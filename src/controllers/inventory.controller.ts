@@ -1,15 +1,12 @@
 import { Request, Response } from 'express';
 import { IInventory } from '../database/model';
-import { InventoryService } from '../services/inventory.service';
+import { inventoryService } from '../services/inventory.service';
 import { AddBookToInvertoryDto } from '../dto/inventory.dto';
 import { NotFoundError } from '../errors';
 import transformSuccessResponse from '../utils/response';
 
-const inventoryService = new InventoryService();
-
 const listBooksInLibrary = async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
-
     const libraryInventories: IInventory[] | [] = await inventoryService.getInventoryByLibraryId(id);
     res.status(200).json(transformSuccessResponse('Library books are', { libraryInventories }));
 };
@@ -43,7 +40,6 @@ const addBookToInventory = async (req: Request, res: Response): Promise<void> =>
 
 const removeBookFromInventory = async (req: Request, res: Response): Promise<void> => {
     const { id, bookId } = req.params;
-
     const inventoryItem: IInventory | null = await inventoryService.deleteInventoryItem(id, bookId);
     res.status(200).json(
         transformSuccessResponse('Book removed from inventory successfully', { inventoryItem }),

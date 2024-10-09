@@ -1,7 +1,7 @@
 import { ClientSession } from 'mongoose';
 import { InventoryModel, IInventory } from '../model';
 
-export class InventoryRepository {
+class InventoryRepository {
     async findInventoryByLibraryId(libraryId: string): Promise<IInventory[]> {
         const books: IInventory[] | [] = await InventoryModel.find({ libraryId })
             .populate('libraryId')
@@ -62,3 +62,5 @@ export class InventoryRepository {
         return deletedBook;
     }
 }
+
+export const inventoryRepository = new InventoryRepository();
