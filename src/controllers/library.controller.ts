@@ -1,11 +1,9 @@
 import { Request, Response } from 'express';
-import { LibraryService } from '../services';
+import { libraryService } from '../services';
 import { IBook, IBorrow, IInventory, ILibrary } from '../database/model';
-import { CreateLibraryDto, UpdateLibraryDto } from '../dto/library.dto';
+import { LibraryDto } from '../dto/library.dto';
 import { BorrowBookDto, ReturnBookDto } from '../dto/borrow.dto';
 import transformSuccessResponse from '../utils/response';
-
-const libraryService = new LibraryService();
 
 export interface ILibraryDetails {
     library: ILibrary | null;
@@ -41,7 +39,7 @@ const getALibraryBookDetails = async (req: Request, res: Response): Promise<void
 };
 
 const createLibrary = async (req: Request, res: Response): Promise<void> => {
-    const library: ILibrary = await libraryService.createLibrary(req.body as CreateLibraryDto);
+    const library: ILibrary = await libraryService.createLibrary(req.body as LibraryDto);
     res.status(201).json(transformSuccessResponse('Library created successfully', { library }));
 };
 
@@ -49,7 +47,7 @@ const updateLibrary = async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
     const updatedLibrary: ILibrary | null = await libraryService.updateLibrary(
         id,
-        req.body as UpdateLibraryDto,
+        req.body as Partial<LibraryDto>,
     );
     res.status(200).json(transformSuccessResponse('Library updated successfully', { updatedLibrary }));
 };

@@ -9,6 +9,4 @@ connectDB();
 
 const PORT: string | number = config.PORT;
 
-app.listen(PORT, () => {
-    console.log(`Server is listening on port ${PORT}...🚀`);
-});
+app.listen(PORT, () => console.log(`Server is listening on port ${PORT}...🚀`));

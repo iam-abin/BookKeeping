@@ -2,17 +2,25 @@ import multer, { Multer, StorageEngine, FileFilterCallback } from 'multer';
 import path from 'path';
 import { Request } from 'express';
 
-const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB limit
-const ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png'];
+type FileSizeLimit = {
+    fileSize: number;
+};
+
+const MAX_FILE_SIZE_BYTES: number = 10 * 1024 * 1024; // 10 MB limit
+const ALLOWED_EXTENSIONS: string[] = ['.jpg', '.jpeg', '.png'];
 
 // Configure file storage
 const memoryStorage: StorageEngine = multer.memoryStorage();
 
 // File size limit configuration
-const fileSizeLimit = { fileSize: MAX_FILE_SIZE_BYTES };
+const fileSizeLimit: FileSizeLimit = { fileSize: MAX_FILE_SIZE_BYTES };
 
 // File filter function
-const fileExtensionFilter = (request: Request, file: Express.Multer.File, callback: FileFilterCallback) => {
+const fileExtensionFilter = (
+    request: Request,
+    file: Express.Multer.File,
+    callback: FileFilterCallback,
+): void => {
     const fileExtension: string = path.extname(file.originalname);
     if (!ALLOWED_EXTENSIONS.includes(fileExtension.toLowerCase())) {
         const error = new Error(`Unsupported file type: ${fileExtension}`) as unknown as null;

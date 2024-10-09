@@ -1,9 +1,14 @@
 import i18n from 'i18n';
 import path from 'path';
 
+interface Ii18nConfig {
+    locales: string[];
+    defaultLocale: string;
+    directory: string;
+}
 // It will show response message in the configured language
 // Configure i18n
-const i18nConfig = {
+const i18nConfig: Ii18nConfig = {
     locales: ['en', 'hi'],
     defaultLocale: 'en', // selecetd language
     directory: path.join(__dirname, '../utils', 'translations'), // Custom directory path

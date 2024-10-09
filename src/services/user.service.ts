@@ -1,12 +1,10 @@
 import { IUser } from '../database/model';
-import { UserRepository } from '../database/repository';
+import { userRepository } from '../database/repository';
 import { UserRegisterDto, UserSignInDto } from '../dto/user.dto';
 import { BadRequestError } from '../errors';
 import { comparePassword, createJwtAccessToken } from '../utils';
 
-const userRepository = new UserRepository();
-
-export class AuthService {
+class AuthService {
     public async signUp(userRegisterDto: UserRegisterDto): Promise<IUser> {
         const { email } = userRegisterDto;
 
@@ -36,3 +34,5 @@ export class AuthService {
         return { user: existingUser, accessToken: jwt };
     }
 }
+
+export const authService = new AuthService();

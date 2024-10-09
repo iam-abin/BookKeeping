@@ -1,13 +1,8 @@
 import { IBook, IInventory, ILibrary } from '../database/model';
-import { BookRepository, LibraryRepository } from '../database/repository';
-import { InventoryRepository } from '../database/repository/inventory.repository';
+import { bookRepository, libraryRepository, inventoryRepository } from '../database/repository';
 import { BadRequestError, NotFoundError } from '../errors';
 
-const inventoryRepository = new InventoryRepository();
-const bookRepository = new BookRepository();
-const libraryRepository = new LibraryRepository();
-
-export class InventoryService {
+class InventoryService {
     public async getInventoryByLibraryId(libraryId: string): Promise<IInventory[] | []> {
         const library: ILibrary | null = await libraryRepository.findLibraryById(libraryId);
         if (!library) throw new NotFoundError('Library not found');
@@ -87,3 +82,5 @@ export class InventoryService {
         return deletedBook;
     }
 }
+
+export const inventoryService = new InventoryService();

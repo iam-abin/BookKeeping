@@ -1,12 +1,10 @@
 import { IBook, IUser } from '../database/model';
-import { BookRepository } from '../database/repository';
-import { CreateBookDto, UpdateBookDto } from '../dto/book.dto';
+import { bookRepository } from '../database/repository';
+import { BookDto } from '../dto/book.dto';
 import { BadRequestError, ForbiddenError, NotFoundError } from '../errors';
 import { uploadImage } from '../utils/fileUpload';
 
-const bookRepository = new BookRepository();
-
-export class BookService {
+class BookService {
     public async getAllBooks(): Promise<IBook[] | []> {
         const books: IBook[] | [] = await bookRepository.findAllBooks();
         return books;
@@ -19,7 +17,7 @@ export class BookService {
     }
 
     public async createBook(
-        createBookDto: CreateBookDto,
+        createBookDto: BookDto,
         authorId: string,
         imageFile: Express.Multer.File,
     ): Promise<IBook> {
@@ -39,7 +37,7 @@ export class BookService {
     public async updateBook(
         bookId: string,
         authorId: string,
-        updateBookDto: Partial<UpdateBookDto>,
+        updateBookDto: Partial<BookDto>,
         imageFile: Express.Multer.File,
     ): Promise<IBook | null> {
         const book: IBook | null = await bookRepository.findById(bookId);
@@ -72,3 +70,5 @@ export class BookService {
         return deletedBook;
     }
 }
+
+export const bookService = new BookService();
